@@ -1,0 +1,20 @@
+﻿<Properties StartupConfiguration="{CFEAF826-73A2-1036-D3EF-D6743351E1C4}|">
+  <MonoDevelop.Ide.ItemProperties.Assembly-CSharp PreferredExecutionTarget="Unity.Editor" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/src/Bezier.cs">
+    <Files>
+      <File FileName="Assets/src/Metro.cs" Line="8" Column="39" />
+      <File FileName="Assets/src/MetroLine.cs" Line="8" Column="29" />
+      <File FileName="Assets/src/Train.cs" Line="9" Column="15" />
+      <File FileName="Assets/src/TrainCarriage.cs" Line="9" Column="41" />
+      <File FileName="Assets/src/Platform.cs" Line="7" Column="35" />
+      <File FileName="Assets/src/PathBuilder.cs" Line="8" Column="28" />
+      <File FileName="Assets/src/Bezier.cs" Line="15" Column="3" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MultiItemStartupConfigurations />
+</Properties>
