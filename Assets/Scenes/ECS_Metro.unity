@@ -368,6 +368,7 @@ MonoBehaviour:
   prefab_rail: {fileID: 0}
   totalPoints: 10
   handleStretch: 0.1
+  distanceSmoothingRatio: 0.25
 --- !u!4 &1750520813
 Transform:
   m_ObjectHideFlags: 0

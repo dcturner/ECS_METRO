@@ -9,6 +9,7 @@ public class PathBuilder: MonoBehaviour {
     public BezierPath path;
     public int totalPoints = 10;
     public float handleStretch = 0.5f;
+    public float distanceSmoothingRatio = 0.5f;
 
 	void Start () {
         
@@ -38,7 +39,7 @@ public class PathBuilder: MonoBehaviour {
             Vector3 _CURRENT_POS    = _CURRENT_POINT.location;
             Vector3 _NEXT_POS       = path.points[i + 1].location;
 
-            Vector3 _dist_prev_to_next = _NEXT_POS - _PREV_POS;
+            Vector3 _dist_prev_to_next = (_NEXT_POS - _PREV_POS) / distanceSmoothingRatio;
 
             _CURRENT_POINT.handle_in    = _CURRENT_POS - _dist_prev_to_next * handleStretch;
             _CURRENT_POINT.handle_out   = _CURRENT_POS + _dist_prev_to_next * handleStretch;
