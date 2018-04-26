@@ -244,8 +244,8 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 282840810}
-  m_LocalRotation: {x: -0.35730642, y: 0.06492778, z: -0.024908194, w: -0.9313947}
-  m_LocalPosition: {x: 0.9209988, y: 8.189692, z: -6.990902}
+  m_LocalRotation: {x: -0.21977946, y: 0.73979795, z: -0.2863598, w: -0.5677976}
+  m_LocalPosition: {x: 22.809536, y: 4.4222445, z: 0.5543785}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -366,9 +366,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   prefab_rail: {fileID: 0}
-  totalPoints: 10
-  handleStretch: 0.1
-  distanceSmoothingRatio: 0.25
+  totalPoints: 5
+  handleStretch: 0.3
+  distanceSmoothingRatio: 0.9
+  currentLocationOnPath: 0
+  speed: 0.0003
+  trainLineLength: 1
 --- !u!4 &1750520813
 Transform:
   m_ObjectHideFlags: 0

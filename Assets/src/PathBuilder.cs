@@ -1,7 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using Random = UnityEngine.Random;
 
 public class PathBuilder: MonoBehaviour {
 
@@ -10,54 +12,54 @@ public class PathBuilder: MonoBehaviour {
     public int totalPoints = 10;
     public float handleStretch = 0.5f;
     public float distanceSmoothingRatio = 0.5f;
+    [Range(0f, 1f)]
+    public float currentLocationOnPath = 0f;
+    [Range(0f, 0.1f)]
+    public float speed = 0.001f;
+
+	public float trainLineLength = 1f;
 
 	void Start () {
         
         path = new BezierPath();
         Vector3 currentLocation = Vector3.zero;
-        path.AddPoint(currentLocation, Vector3.zero, Vector3.zero);
-        // create random points
-        for (int i = 1; i < totalPoints; i++)
+        // create OUT points
+        for (int i = 0; i < totalPoints; i++)
         {
-            currentLocation.x += Random.Range(-3f, 3f);
-            currentLocation.z += Random.Range(-3f, 3f);
-            path.AddPoint(currentLocation, currentLocation, currentLocation);
+Vector3 _POS = new Vector3(Mathf.Lerp(0f, 5f, (float)i/totalPoints) * 5f, 0f, Random.Range(-1f, 1f));
+            path.AddPoint(_POS);
+	        
         }
+	    // create matching RETURN points
+	    for (int i = totalPoints - 1; i >=0; i--)
+	    {
+		    Vector3 _targetLocation = path.GetPoint_PerpendicularOffset(path.points[i], 1f);
+	        path.AddPoint(_targetLocation);
+	    }
         // make the handles nicer
-        // start
-        BezierPoint bz_START = path.points[0];
-        bz_START.handle_in = bz_START.location;
-        bz_START.handle_out = Vector3.Lerp(bz_START.location, path.points[1].location, handleStretch);
-        // end
-        BezierPoint bz_END = path.points[totalPoints-1];
-        bz_END.handle_in = Vector3.Lerp(bz_END.location, path.points[totalPoints - 2].location, handleStretch);
-        bz_END.handle_out = bz_END.location;
-        for (int i = 1; i < totalPoints-1; i++)
+        for (int i = 1; i < (totalPoints*2)-1; i++)
         {
             BezierPoint _CURRENT_POINT = path.points[i];
-            Vector3 _PREV_POS       = path.points[i - 1].location;
+            Vector3 _PREV_POS       = path.points[(i - 1) % totalPoints].location;
             Vector3 _CURRENT_POS    = _CURRENT_POINT.location;
-            Vector3 _NEXT_POS       = path.points[i + 1].location;
+            Vector3 _NEXT_POS       = path.points[(i + 1) % totalPoints].location;
 
             Vector3 _dist_prev_to_next = (_NEXT_POS - _PREV_POS) / distanceSmoothingRatio;
 
             _CURRENT_POINT.handle_in    = _CURRENT_POS - _dist_prev_to_next * handleStretch;
             _CURRENT_POINT.handle_out   = _CURRENT_POS + _dist_prev_to_next * handleStretch;
         }
-
-        // connect the locations
-
-
 	}
-	public void OnGUI()
+	
+	private void Update()
 	{
-        
+        currentLocationOnPath = (currentLocationOnPath + speed) % 1;
 	}
 	public void OnDrawGizmos()
 	{
         if (path != null)
         {
-            for (int i = 0; i < totalPoints; i++)
+            for (int i = 0; i < totalPoints * 2; i++)
             {
                 BezierPoint _CURRENT_POINT = path.points[i];
 
@@ -69,7 +71,7 @@ public class PathBuilder: MonoBehaviour {
                 Gizmos.color = Color.green;
                 Gizmos.DrawWireCube(_CURRENT_POINT.handle_out, Vector3.one * 0.05f);
 
-                if (i < totalPoints-1 )
+                if (i < (totalPoints*2)-1 )
                 {
                     BezierPoint _NEXT_POINT = path.points[i + 1];
                     // Link them up
@@ -78,6 +80,20 @@ public class PathBuilder: MonoBehaviour {
             }
         }
         
+        float gap = 1f / 10f;
+		float halfTrain = trainLineLength * 0.5f;
+        for (int i = 0; i < 10; i++)
+        {
+	        float iProgress = (currentLocationOnPath + (i * gap)) % 1f;
+            Vector3 _POS = path.Get_ProgressPosition(iProgress);
+	        Vector3 _NORMAL = path.Get_NormalAtPosition(iProgress);
+	        Vector3 _TANGENT = path.Get_TangentAtPosition(iProgress);
+	        
+	        Gizmos.color = Color.red;
+            Gizmos.DrawLine(_POS - _NORMAL * halfTrain, _POS + _NORMAL * halfTrain);
+	        Gizmos.color = Color.yellow;
+	        Gizmos.DrawLine(_POS - _TANGENT * halfTrain, _POS + _TANGENT * halfTrain);
+        }
 
 	}
 }
