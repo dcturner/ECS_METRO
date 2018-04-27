@@ -1,12 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Advertisements;
 
 public class BezierPath
 {
     public const int DISTANCE_MEASUREMENT_SUBDIVISIONS = 100;
-    public const float HANDLE_STRETCH = 0.01f;
+    public const float HANDLE_STRETCH = 0.1f;
     public const float DISTANCE_SMOOTHING = 1f;
     public List<BezierPoint> points;
     private float pathLength;
@@ -19,24 +18,29 @@ public class BezierPath
 
     public void AddPoint(Vector3 _location)
     {
-        points.Add(new BezierPoint(_location, _location, _location, 0f));
-        int totalPoints = points.Count;
-        if (totalPoints >= 1)
+        points.Add(new BezierPoint(_location, _location, _location));
+        if (points.Count > 1)
         {
-            // Get required points
-            BezierPoint _prevPoint = (totalPoints > 1) ? points[totalPoints - 2] : points[0];
-            BezierPoint _currentPoint = points[totalPoints - 1];
-            BezierPoint _nextPoint = points[0];
+            BezierPoint _prev = points[points.Count - 2];
+            BezierPoint _current = points[points.Count - 1];
+            SetHandles(_current, _prev.location);
+            SetPointDistance(_current, _prev);
+        }
+    }
 
-            // Get locations
-            Vector3 _PREV_POS = _prevPoint.location;
-            Vector3 _CURRENT_POS = _currentPoint.location;
-            Vector3 _NEXT_POS = _nextPoint.location;
+    void SetHandles(BezierPoint _point, Vector3 _prevPointLocation)
+    {
+        Vector3 _pointLocation = _point.location;
+        Vector3 _dist_prev_to_next = (_point.location - _prevPointLocation) / DISTANCE_SMOOTHING;
 
-            Vector3 _dist_prev_to_next = (_NEXT_POS - _PREV_POS) / DISTANCE_SMOOTHING;
+        _point.handle_in = _pointLocation - (_dist_prev_to_next * HANDLE_STRETCH);
+        _point.handle_out = _pointLocation + (_dist_prev_to_next * HANDLE_STRETCH);     
+    }
 
-            _currentPoint.handle_in = _CURRENT_POS - _dist_prev_to_next * HANDLE_STRETCH;
-            _currentPoint.handle_out = _CURRENT_POS + _dist_prev_to_next * HANDLE_STRETCH;
+    public void SetPointDistance(BezierPoint _currentPoint, BezierPoint _prevPoint) {
+        // Get locations
+        Vector3 _PREV_POS = _prevPoint.location;
+        Vector3 _CURRENT_POS = _currentPoint.location;
 
             // Measure this new bezier point
             float measurementIncrement = 1f / BezierPath.DISTANCE_MEASUREMENT_SUBDIVISIONS;
@@ -51,12 +55,46 @@ public class BezierPath
 
             distance += regionDistance;
             _currentPoint.distanceAlongPath = distance;
-        }
-
-        Debug.Log("BezPoint[" + points.Count + "] - starts at " + distance);
-        Debug.Log("Total path distance = " + distance);
     }
 
+    // Add the final region distance (from last point back to first point
+    public void CloseLoop()
+    {
+        // easy acces vars
+        int _FINAL_INDEX = points.Count - 1;
+        BezierPoint _firstPoint = points[0];
+        Vector3 _firstPoint_POS = _firstPoint.location;
+        BezierPoint _secondPoint = points[1];
+        Vector3 _secondPoint_POS = _secondPoint.location;
+        BezierPoint _lastPoint = points[_FINAL_INDEX];
+        Vector3 _lastPoint_POS = _lastPoint.location;
+        
+        
+        // Fix the start's handles
+        Vector3 dist_p0_to_p1 = _secondPoint_POS - _firstPoint_POS;
+        SetHandles(_firstPoint, _firstPoint_POS - dist_p0_to_p1);
+        // Fix the returnStart's handles
+        int index_returnOne = Mathf.FloorToInt(points.Count / 2);
+        BezierPoint _returnOnePoint = points[index_returnOne];
+        BezierPoint _returnTwoPoint = points[index_returnOne+1];
+        Vector3 _returnOne_POS = _returnOnePoint.location;
+        Vector3 _returnTwo_POS = _returnTwoPoint.location;
+        Vector3 dist_r0_to_r1 = points[index_returnOne+1].location - _returnOne_POS;
+        SetHandles(_returnOnePoint, _returnOne_POS - dist_r0_to_r1);
+         
+        
+        // add final region distance (END to START)
+        float measurementIncrement = 1f / BezierPath.DISTANCE_MEASUREMENT_SUBDIVISIONS;
+        float regionDistance = 0f;
+        for (int i = 0; i < BezierPath.DISTANCE_MEASUREMENT_SUBDIVISIONS - 1; i++)
+        {
+            float _CURRENT_SUBDIV = i * measurementIncrement;
+            float _NEXT_SOBDIV = (i + 1) * measurementIncrement;
+            regionDistance += Vector3.Distance(BezierLerp(_lastPoint,_firstPoint, _CURRENT_SUBDIV),
+                BezierLerp(_lastPoint, _firstPoint, _NEXT_SOBDIV));
+        }
+        distance += regionDistance;
+    }
 
     public Vector3 Get_NormalAtPosition(float _position)
     {
@@ -118,7 +156,7 @@ public class BezierPath
         point_region_end = points[pointIndex_region_end];
         // lerp between the points to arrive at PROGRESS
         float pathProgress_start = point_region_start.distanceAlongPath / distance;
-        float pathProgress_end = point_region_end.distanceAlongPath / distance;
+        float pathProgress_end = (pointIndex_region_end != 0) ?  point_region_end.distanceAlongPath / distance : 1f;
         float regionProgress = (_progress - pathProgress_start) / (pathProgress_end - pathProgress_start);
 
         // do your bezier lerps
@@ -149,13 +187,12 @@ public class BezierPath
 public class BezierPoint
 {
     public Vector3 location, handle_in, handle_out;
-    public float distanceAlongPath;
+    public float distanceAlongPath = 0f;
 
-    public BezierPoint(Vector3 _location, Vector3 _handle_in, Vector3 _handle_out, float _distanceAlongPath = 0f)
+    public BezierPoint(Vector3 _location, Vector3 _handle_in, Vector3 _handle_out)
     {
         location = _location;
         handle_in = _handle_in;
         handle_out = _handle_out;
-        distanceAlongPath = _distanceAlongPath;
     }
 }

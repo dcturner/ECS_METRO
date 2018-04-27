@@ -33,22 +33,11 @@ Vector3 _POS = new Vector3(Mathf.Lerp(0f, 5f, (float)i/totalPoints) * 5f, 0f, Ra
 	    // create matching RETURN points
 	    for (int i = totalPoints - 1; i >=0; i--)
 	    {
-		    Vector3 _targetLocation = path.GetPoint_PerpendicularOffset(path.points[i], 1f);
+		    Vector3 _targetLocation = path.GetPoint_PerpendicularOffset(path.points[i], (i==totalPoints-1) ? -1f : 1f);
 	        path.AddPoint(_targetLocation);
 	    }
-        // make the handles nicer
-        for (int i = 1; i < (totalPoints*2)-1; i++)
-        {
-            BezierPoint _CURRENT_POINT = path.points[i];
-            Vector3 _PREV_POS       = path.points[(i - 1) % totalPoints].location;
-            Vector3 _CURRENT_POS    = _CURRENT_POINT.location;
-            Vector3 _NEXT_POS       = path.points[(i + 1) % totalPoints].location;
 
-            Vector3 _dist_prev_to_next = (_NEXT_POS - _PREV_POS) / distanceSmoothingRatio;
-
-            _CURRENT_POINT.handle_in    = _CURRENT_POS - _dist_prev_to_next * handleStretch;
-            _CURRENT_POINT.handle_out   = _CURRENT_POS + _dist_prev_to_next * handleStretch;
-        }
+		path.CloseLoop();
 	}
 	
 	private void Update()
@@ -59,24 +48,22 @@ Vector3 _POS = new Vector3(Mathf.Lerp(0f, 5f, (float)i/totalPoints) * 5f, 0f, Ra
 	{
         if (path != null)
         {
-            for (int i = 0; i < totalPoints * 2; i++)
+            for (int i = 0; i < path.points.Count; i++)
             {
                 BezierPoint _CURRENT_POINT = path.points[i];
 
                 Gizmos.color = Color.cyan;
-                Gizmos.DrawWireCube(_CURRENT_POINT.location, Vector3.one * 0.2f);
+                Gizmos.DrawWireSphere(_CURRENT_POINT.location, 0.1f);
 
                 Gizmos.color = Color.red;
-                Gizmos.DrawWireCube(_CURRENT_POINT.handle_in, Vector3.one * 0.05f);
+                Gizmos.DrawWireCube(_CURRENT_POINT.handle_in, Vector3.one * 0.025f);
                 Gizmos.color = Color.green;
-                Gizmos.DrawWireCube(_CURRENT_POINT.handle_out, Vector3.one * 0.05f);
+                Gizmos.DrawWireCube(_CURRENT_POINT.handle_out, Vector3.one * 0.025f);
 
-                if (i < (totalPoints*2)-1 )
-                {
-                    BezierPoint _NEXT_POINT = path.points[i + 1];
-                    // Link them up
-                    Handles.DrawBezier(_CURRENT_POINT.location, _NEXT_POINT.location, _CURRENT_POINT.handle_out, _NEXT_POINT.handle_in, Color.cyan,null , 3f);
-                }
+                BezierPoint _NEXT_POINT = path.points[(i + 1) % path.points.Count];
+                // Link them up
+                Handles.DrawBezier(_CURRENT_POINT.location, _NEXT_POINT.location, _CURRENT_POINT.handle_out, _NEXT_POINT.handle_in, Color.cyan,null , 3f);
+                
             }
         }
         
@@ -89,10 +76,9 @@ Vector3 _POS = new Vector3(Mathf.Lerp(0f, 5f, (float)i/totalPoints) * 5f, 0f, Ra
 	        Vector3 _NORMAL = path.Get_NormalAtPosition(iProgress);
 	        Vector3 _TANGENT = path.Get_TangentAtPosition(iProgress);
 	        
-	        Gizmos.color = Color.red;
-            Gizmos.DrawLine(_POS - _NORMAL * halfTrain, _POS + _NORMAL * halfTrain);
 	        Gizmos.color = Color.yellow;
-	        Gizmos.DrawLine(_POS - _TANGENT * halfTrain, _POS + _TANGENT * halfTrain);
+	        Gizmos.DrawCube(_POS, Vector3.one * 0.25f);
+
         }
 
 	}
