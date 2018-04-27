@@ -7,6 +7,7 @@
         <e p="src" t="Include">
           <e p="Behaviours" t="Include">
             <e p="Approach.cs" t="Include" />
+            <e p="Colour.cs" t="Include" />
             <e p="Friction.cs" t="Include" />
           </e>
           <e p="Bezier.cs" t="Include" />
@@ -15,6 +16,7 @@
           <e p="MetroLine.cs" t="Include" />
           <e p="PathBuilder.cs" t="Include" />
           <e p="Platform.cs" t="Include" />
+          <e p="RailMarker.cs" t="Include" />
           <e p="Station.cs" t="Include" />
           <e p="Train.cs" t="Include" />
           <e p="TrainCarriage.cs" t="Include" />

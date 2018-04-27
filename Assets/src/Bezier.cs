@@ -4,9 +4,6 @@ using UnityEngine;
 
 public class BezierPath
 {
-    public const int DISTANCE_MEASUREMENT_SUBDIVISIONS = 100;
-    public const float HANDLE_STRETCH = 0.1f;
-    public const float DISTANCE_SMOOTHING = 1f;
     public List<BezierPoint> points;
     private float pathLength;
     private float distance = 0f;
@@ -16,9 +13,10 @@ public class BezierPath
         points = new List<BezierPoint>();
     }
 
-    public void AddPoint(Vector3 _location)
+    public BezierPoint AddPoint(Vector3 _location)
     {
-        points.Add(new BezierPoint(_location, _location, _location));
+        BezierPoint result = new BezierPoint(_location, _location, _location);
+        points.Add(result);
         if (points.Count > 1)
         {
             BezierPoint _prev = points[points.Count - 2];
@@ -26,22 +24,24 @@ public class BezierPath
             SetHandles(_current, _prev.location);
             SetPointDistance(_current, _prev);
         }
+
+        return result;
     }
 
     void SetHandles(BezierPoint _point, Vector3 _prevPointLocation)
     {
         Vector3 _pointLocation = _point.location;
-        Vector3 _dist_prev_to_next = (_point.location - _prevPointLocation) / DISTANCE_SMOOTHING;
+        Vector3 _dist_prev_to_next = (_point.location - _prevPointLocation) / Metro.BEZIER_DISTANCE_SMOOTHING;
 
-        _point.handle_in = _pointLocation - (_dist_prev_to_next * HANDLE_STRETCH);
-        _point.handle_out = _pointLocation + (_dist_prev_to_next * HANDLE_STRETCH);     
+        _point.handle_in = _pointLocation - (_dist_prev_to_next * Metro.BEZIER_HANDLE_REACH);
+        _point.handle_out = _pointLocation + (_dist_prev_to_next * Metro.BEZIER_HANDLE_REACH);     
     }
 
     public void SetPointDistance(BezierPoint _currentPoint, BezierPoint _prevPoint) {
             // Measure this new bezier point
-            float measurementIncrement = 1f / BezierPath.DISTANCE_MEASUREMENT_SUBDIVISIONS;
+            float measurementIncrement = 1f / Metro.BEZIER_MEASUREMENT_SUBDIVISIONS;
             float regionDistance = 0f;
-            for (int i = 0; i < BezierPath.DISTANCE_MEASUREMENT_SUBDIVISIONS - 1; i++)
+            for (int i = 0; i < Metro.BEZIER_MEASUREMENT_SUBDIVISIONS- 1; i++)
             {
                 float _CURRENT_SUBDIV = i * measurementIncrement;
                 float _NEXT_SOBDIV = (i + 1) * measurementIncrement;
@@ -78,9 +78,9 @@ public class BezierPath
          
         
         // add final region distance (END to START)
-        float measurementIncrement = 1f / BezierPath.DISTANCE_MEASUREMENT_SUBDIVISIONS;
+        float measurementIncrement = 1f / Metro.BEZIER_MEASUREMENT_SUBDIVISIONS;
         float regionDistance = 0f;
-        for (int i = 0; i < BezierPath.DISTANCE_MEASUREMENT_SUBDIVISIONS - 1; i++)
+        for (int i = 0; i < Metro.BEZIER_MEASUREMENT_SUBDIVISIONS - 1; i++)
         {
             float _CURRENT_SUBDIV = i * measurementIncrement;
             float _NEXT_SOBDIV = (i + 1) * measurementIncrement;
@@ -182,11 +182,13 @@ public class BezierPoint
 {
     public Vector3 location, handle_in, handle_out;
     public float distanceAlongPath = 0f;
+    public List<string> tags;
 
     public BezierPoint(Vector3 _location, Vector3 _handle_in, Vector3 _handle_out)
     {
         location = _location;
         handle_in = _handle_in;
         handle_out = _handle_out;
+        tags = new List<string>();
     }
 }

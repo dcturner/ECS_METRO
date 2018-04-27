@@ -19,7 +19,7 @@ public class PathBuilder: MonoBehaviour {
 
 	public float trainLineLength = 1f;
 
-	void Start () {
+	public void CreateLine() {
         
         path = new BezierPath();
         Vector3 currentLocation = Vector3.zero;
