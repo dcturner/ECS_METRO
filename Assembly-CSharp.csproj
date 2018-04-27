@@ -53,6 +53,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\src\Behaviours\Approach.cs" />
+    <Compile Include="Assets\src\Behaviours\Friction.cs" />
     <Compile Include="Assets\src\Bezier.cs" />
     <Compile Include="Assets\src\Commuter.cs" />
     <Compile Include="Assets\src\Metro.cs" />

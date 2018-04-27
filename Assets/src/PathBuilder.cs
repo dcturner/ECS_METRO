@@ -65,21 +65,17 @@ Vector3 _POS = new Vector3(Mathf.Lerp(0f, 5f, (float)i/totalPoints) * 5f, 0f, Ra
                 Handles.DrawBezier(_CURRENT_POINT.location, _NEXT_POINT.location, _CURRENT_POINT.handle_out, _NEXT_POINT.handle_in, Color.cyan,null , 3f);
                 
             }
-        }
-        
         float gap = 1f / 10f;
-		float halfTrain = trainLineLength * 0.5f;
         for (int i = 0; i < 10; i++)
         {
 	        float iProgress = (currentLocationOnPath + (i * gap)) % 1f;
             Vector3 _POS = path.Get_ProgressPosition(iProgress);
-	        Vector3 _NORMAL = path.Get_NormalAtPosition(iProgress);
-	        Vector3 _TANGENT = path.Get_TangentAtPosition(iProgress);
-	        
 	        Gizmos.color = Color.yellow;
 	        Gizmos.DrawCube(_POS, Vector3.one * 0.25f);
 
         }
+        }
+        
 
 	}
 }

@@ -38,10 +38,6 @@ public class BezierPath
     }
 
     public void SetPointDistance(BezierPoint _currentPoint, BezierPoint _prevPoint) {
-        // Get locations
-        Vector3 _PREV_POS = _prevPoint.location;
-        Vector3 _CURRENT_POS = _currentPoint.location;
-
             // Measure this new bezier point
             float measurementIncrement = 1f / BezierPath.DISTANCE_MEASUREMENT_SUBDIVISIONS;
             float regionDistance = 0f;
@@ -67,7 +63,6 @@ public class BezierPath
         BezierPoint _secondPoint = points[1];
         Vector3 _secondPoint_POS = _secondPoint.location;
         BezierPoint _lastPoint = points[_FINAL_INDEX];
-        Vector3 _lastPoint_POS = _lastPoint.location;
         
         
         // Fix the start's handles
@@ -78,7 +73,6 @@ public class BezierPath
         BezierPoint _returnOnePoint = points[index_returnOne];
         BezierPoint _returnTwoPoint = points[index_returnOne+1];
         Vector3 _returnOne_POS = _returnOnePoint.location;
-        Vector3 _returnTwo_POS = _returnTwoPoint.location;
         Vector3 dist_r0_to_r1 = points[index_returnOne+1].location - _returnOne_POS;
         SetHandles(_returnOnePoint, _returnOne_POS - dist_r0_to_r1);
          
