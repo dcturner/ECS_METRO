@@ -2,8 +2,12 @@
 <project version="4">
   <component name="ContentModelStore">
     <e p="$PROJECT_DIR$" t="IncludeRecursive">
+      <e p="Assembly-CSharp-Editor.csproj" t="IncludeRecursive" />
       <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
       <e p="Assets" t="Include">
+        <e p="Editor" t="Include">
+          <e p="ConfigureRailMarkers.cs" t="Include" />
+        </e>
         <e p="src" t="Include">
           <e p="Behaviours" t="Include">
             <e p="Approach.cs" t="Include" />
@@ -12,11 +16,13 @@
           </e>
           <e p="Bezier.cs" t="Include" />
           <e p="Commuter.cs" t="Include" />
+          <e p="EditorTools" t="Include">
+            <e p="PathBuilder.cs" t="Include" />
+            <e p="RailMarker.cs" t="Include" />
+          </e>
           <e p="Metro.cs" t="Include" />
           <e p="MetroLine.cs" t="Include" />
-          <e p="PathBuilder.cs" t="Include" />
           <e p="Platform.cs" t="Include" />
-          <e p="RailMarker.cs" t="Include" />
           <e p="Station.cs" t="Include" />
           <e p="Train.cs" t="Include" />
           <e p="TrainCarriage.cs" t="Include" />

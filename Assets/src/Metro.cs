@@ -88,6 +88,11 @@ public class Metro : MonoBehaviour
                 Debug.LogWarning("Insufficient RailMarkers found for line: " + i +", you need to add the outbound points");
             }
         }
+        // now destroy all RailMarkers
+        foreach (RailMarker _RM in FindObjectsOfType<RailMarker>())
+        {
+            Destroy(_RM);
+        }
     }
     
     #region ------------------------- < GIZMOS
@@ -117,7 +122,7 @@ public class Metro : MonoBehaviour
                         BezierPoint _NEXT_POINT = _path.points[(pointIndex + 1) % _path.points.Count];
                         // Link them up
                         Handles.DrawBezier(_CURRENT_POINT.location, _NEXT_POINT.location, _CURRENT_POINT.handle_out,
-                            _NEXT_POINT.handle_in, Color.cyan, null, 3f);
+                            _NEXT_POINT.handle_in, GetLine_COLOUR_FromIndex(i), null, 3f);
 
                     }
                 }

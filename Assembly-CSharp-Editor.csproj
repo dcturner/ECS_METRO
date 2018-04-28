@@ -53,7 +53,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Editor\RailMarker_Handle.cs" />
+    <Compile Include="Assets\Editor\ConfigureRailMarkers.cs" />
     <Reference Include="UnityEditor.StandardEvents">
       <HintPath>/Users/dcturner/Documents/KerShoot/git/ECS_METRO/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>
     </Reference>
