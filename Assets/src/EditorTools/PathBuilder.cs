@@ -69,7 +69,7 @@ Vector3 _POS = new Vector3(Mathf.Lerp(0f, 5f, (float)i/totalPoints) * 5f, 0f, Ra
         for (int i = 0; i < 10; i++)
         {
 	        float iProgress = (currentLocationOnPath + (i * gap)) % 1f;
-            Vector3 _POS = path.Get_ProgressPosition(iProgress);
+            Vector3 _POS = path.Get_Position(iProgress);
 	        Gizmos.color = Color.yellow;
 	        Gizmos.DrawCube(_POS, Vector3.one * 0.25f);
 

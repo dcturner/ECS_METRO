@@ -64,9 +64,9 @@
     <Compile Include="Assets\src\MetroLine.cs" />
     <Compile Include="Assets\src\Platform.cs" />
     <Compile Include="Assets\src\Station.cs" />
-    <Compile Include="Assets\src\Train.cs" />
-    <Compile Include="Assets\src\TrainCarriage.cs" />
-    <Compile Include="Assets\src\TrainCarriage_door.cs" />
+    <Compile Include="Assets\src\Train\Train.cs" />
+    <Compile Include="Assets\src\Train\TrainCarriage.cs" />
+    <Compile Include="Assets\src\Train\TrainCarriage_door.cs" />
     <Compile Include="Assets\src\Walkway.cs" />
     <Reference Include="UnityEditor.StandardEvents">
       <HintPath>/Users/dcturner/Documents/KerShoot/git/ECS_METRO/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>

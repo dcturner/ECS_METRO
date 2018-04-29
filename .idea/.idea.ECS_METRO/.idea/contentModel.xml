@@ -24,9 +24,11 @@
           <e p="MetroLine.cs" t="Include" />
           <e p="Platform.cs" t="Include" />
           <e p="Station.cs" t="Include" />
-          <e p="Train.cs" t="Include" />
-          <e p="TrainCarriage.cs" t="Include" />
-          <e p="TrainCarriage_door.cs" t="Include" />
+          <e p="Train" t="Include">
+            <e p="Train.cs" t="Include" />
+            <e p="TrainCarriage.cs" t="Include" />
+            <e p="TrainCarriage_door.cs" t="Include" />
+          </e>
           <e p="Walkway.cs" t="Include" />
         </e>
       </e>

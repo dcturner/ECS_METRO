@@ -92,8 +92,8 @@ public class BezierPath
 
     public Vector3 Get_NormalAtPosition(float _position)
     {
-        Vector3 _current = Get_ProgressPosition(_position);
-        Vector3 _ahead = Get_ProgressPosition((_position + 0.0001f) % 1f);
+        Vector3 _current = Get_Position(_position);
+        Vector3 _ahead = Get_Position((_position + 0.0001f) % 1f);
         return (_ahead - _current) / Vector3.Distance(_ahead, _current);
     }
 
@@ -108,7 +108,7 @@ public class BezierPath
         return _point.location + Get_TangentAtPosition(_point.distanceAlongPath / distance) * _offset;
     }
 
-    public Vector3 Get_ProgressPosition(float _progress)
+    public Vector3 Get_Position(float _progress)
     {
         int totalPoints = points.Count;
 

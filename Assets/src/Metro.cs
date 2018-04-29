@@ -9,17 +9,27 @@ public class Metro : MonoBehaviour
     public static float CUSTOMER_SATISFACTION = 1f;
     public static float BEZIER_HANDLE_REACH = 0.1f;
     public static float BEZIER_DISTANCE_SMOOTHING = 0.95f;
+    public static float BEZIER_PLATFORM_OFFSET = 3f;
     public const int BEZIER_MEASUREMENT_SUBDIVISIONS = 100;
     public static Metro INSTANCE;
     
+    
+    
     // PUBLICS
+    public GameObject prefab_trainCarriage;
+    [Range(0f,1f)]
     public float Bezier_HandleReach = 0.3f;
     public float Bezier_DistanceSmoothing = 0.95f;
+    public float Bezier_PlatformOffset = 3f;
     
     public string[] LineNames;
+    public int[] maxTrains;
+    public int[] carriagesPerTrain;
+    public float[] trainCarriageSpacing;
     private int totalLines = 0;
     public Color[] LineColours;
 
+    [HideInInspector]
     public MetroLine[] metroLines;
 
     public static string GetLine_NAME_FromIndex(int _index)
@@ -52,11 +62,29 @@ public class Metro : MonoBehaviour
         return result;
     }
 
+    private void Awake()
+    {
+        INSTANCE = this;
+    }
+
     private void Start()
     {
-        Metro.BEZIER_HANDLE_REACH = Bezier_HandleReach;
-        Metro.BEZIER_DISTANCE_SMOOTHING = Bezier_DistanceSmoothing;
+        BEZIER_HANDLE_REACH = Bezier_HandleReach;
+        BEZIER_DISTANCE_SMOOTHING = Bezier_DistanceSmoothing;
+        BEZIER_PLATFORM_OFFSET = Bezier_PlatformOffset;
         SetupMetroLines();
+        SetupTrains();
+    }
+
+    private void Update()
+    {
+        for (int i = 0; i < totalLines; i++)
+        {
+            if (metroLines[i] != null)
+            {
+                metroLines[i].UpdateTrains();
+            }
+        }
     }
 
     void SetupMetroLines()
@@ -76,9 +104,7 @@ public class Metro : MonoBehaviour
                     _relevantMarkers.Where(m => m.isPlatform).Select(m => m.pointIndex).ToArray();
 
 
-                MetroLine _newLine = new MetroLine(i);
-                _newLine.lineName = LineNames[i];
-                _newLine.lineColour = LineColours[i];
+                MetroLine _newLine = new MetroLine(i, maxTrains[i]);
                 _newLine.Create_RailPath(_relevantMarkers.Select(m => m.transform.position).ToArray(),
                     _platformPointIndexes);
                 metroLines[i] = _newLine;
@@ -94,7 +120,23 @@ public class Metro : MonoBehaviour
             Destroy(_RM);
         }
     }
-    
+
+    void SetupTrains()
+    {
+        for (int i = 0; i < totalLines; i++)
+        {
+            if (metroLines[i] != null)
+            {
+                MetroLine _ML = metroLines[i];
+                float trainSpacing = 1f / _ML.maxTrains;
+                for (int trainIndex = 0; trainIndex < _ML.maxTrains; trainIndex++)
+                {
+                    _ML.AddTrain(trainIndex * trainSpacing);
+                }
+            }
+        }
+    }
+
     #region ------------------------- < GIZMOS
 
     private void OnDrawGizmos()
