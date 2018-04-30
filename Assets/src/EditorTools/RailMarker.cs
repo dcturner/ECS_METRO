@@ -4,13 +4,20 @@ using System.Linq;
 using UnityEngine;
 using UnityEditor;
 
+public enum RailMarkerType
+{
+	PLATFORM_START,
+	PLATFORM_END,
+	ROUTE
+}
+
 [ExecuteInEditMode]
 public class RailMarker : MonoBehaviour
 {
 
 	public int metroLineID;
 	public int pointIndex;
-	public bool isPlatform = false;
+	public RailMarkerType railMarkerType;
 
 	private void Awake()
 	{
@@ -19,7 +26,7 @@ public class RailMarker : MonoBehaviour
 	}
 	public void OnDrawGizmos()
 	{
-		Gizmos.color = GUI.color = Metro.GetLine_COLOUR_FromIndex(metroLineID);
+		Gizmos.color = GUI.color = (railMarkerType != RailMarkerType.PLATFORM_START) ?  Metro.GetLine_COLOUR_FromIndex(metroLineID) : Color.white;
 		
 		// Draw marker X
 		float xSize = 0.5f;

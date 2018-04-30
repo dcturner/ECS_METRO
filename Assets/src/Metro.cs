@@ -16,6 +16,7 @@ public class Metro : MonoBehaviour
     
     // PUBLICS
     public GameObject prefab_trainCarriage;
+    public GameObject prefab_platform;
     [Range(0f,1f)]
     public float Bezier_HandleReach = 0.3f;
     public float Bezier_PlatformOffset = 3f;
@@ -98,12 +99,11 @@ public class Metro : MonoBehaviour
             if (_relevantMarkers.Count > 1)
             {
                 int[] _platformPointIndexes =
-                    _relevantMarkers.Where(m => m.isPlatform).Select(m => m.pointIndex).ToArray();
+                    _relevantMarkers.Where(m => m.railMarkerType == RailMarkerType.PLATFORM_START).Select(m => m.pointIndex).ToArray();
 
 
                 MetroLine _newLine = new MetroLine(i, maxTrains[i]);
-                _newLine.Create_RailPath(_relevantMarkers.Select(m => m.transform.position).ToArray(),
-                    _platformPointIndexes);
+                _newLine.Create_RailPath(_relevantMarkers);
                 metroLines[i] = _newLine;
             }
             else
@@ -162,8 +162,6 @@ public class Metro : MonoBehaviour
                         // Link them up
                         Handles.DrawBezier(_CURRENT_POINT.location, _NEXT_POINT.location, _CURRENT_POINT.handle_out,
                             _NEXT_POINT.handle_in, GetLine_COLOUR_FromIndex(i), null, 3f);
-                        float currentPointDistance = _CURRENT_POINT.distanceAlongPath;
-                        Handles.Label(_CURRENT_POINT.location, currentPointDistance.ToString("##.##") + " / " + _path.GetPathDistance().ToString("##.##"));
                     }
                 }
             }

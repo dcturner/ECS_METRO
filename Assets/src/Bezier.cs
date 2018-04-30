@@ -68,7 +68,6 @@ public class BezierPath
     public void MeasurePoint(int _currentPoint, int _prevPoint) {
             distance += Get_AccurateDistanceBetweenPoints(_currentPoint, _prevPoint);
             points[_currentPoint].distanceAlongPath = distance;
-        Debug.Log("point["+_currentPoint+"], distance " + distance);
     }
 
     public Vector3 Get_NormalAtPosition(float _position)
