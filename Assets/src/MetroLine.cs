@@ -55,9 +55,11 @@ public class MetroLine  {
     public void Create_RailPath(Vector3[] _outboundPoints, int[] _designatedPlatforms) {
         
         bezierPath = new BezierPath();
+        List<BezierPoint> _POINTS = bezierPath.points;
         int totalPoints = _outboundPoints.Length;
         Vector3 currentLocation = Vector3.zero;
-        // create OUT points
+        
+        // - - - - - - - - - - - - - - - - - - - - - - - -  OUTBOUND points
         for (int i = 0; i < totalPoints; i++)
         {
             BezierPoint _currentPoint = bezierPath.AddPoint(_outboundPoints[i]);
@@ -67,15 +69,51 @@ public class MetroLine  {
             }
 
         }
-        // create matching RETURN points
+        // fix the OUTBOUND handles
+        for (int i = 0; i <= totalPoints-1; i++)
+        {
+            BezierPoint _currentPoint = _POINTS[i];
+            if (i == 0)
+            {
+                _currentPoint.SetHandles(_POINTS[1].location - _currentPoint.location);
+            }else if (i == totalPoints - 1)
+            {
+                _currentPoint.SetHandles(_currentPoint.location - _POINTS[i-1].location);
+            }
+            else
+            {
+                _currentPoint.SetHandles(_POINTS[i+1].location - _POINTS[i-1].location);
+            }
+        }
+        bezierPath.MeasurePath();
+        
+        // - - - - - - - - - - - - - - - - - - - - - - - -  RETURN points
         float platformOffset = Metro.BEZIER_PLATFORM_OFFSET;
+        List<BezierPoint> _RETURN_POINTS = new List<BezierPoint>();
         for (int i = totalPoints - 1; i >=0; i--)
         {
-            Vector3 _targetLocation = bezierPath.GetPoint_PerpendicularOffset(bezierPath.points[i], (i==totalPoints-1) ? -platformOffset : platformOffset);
+            Vector3 _targetLocation = bezierPath.GetPoint_PerpendicularOffset(bezierPath.points[i], (i==totalPoints-1) ? platformOffset : platformOffset);
             bezierPath.AddPoint(_targetLocation);
+            _RETURN_POINTS.Add(_POINTS[_POINTS.Count-1]);
         }
-
-        bezierPath.CloseLoop();
+        
+        // fix the RETURN handles
+        for (int i = 0; i <= totalPoints-1; i++)
+        {
+            BezierPoint _currentPoint = _RETURN_POINTS[i];
+            if (i == 0)
+            {
+                _currentPoint.SetHandles(_RETURN_POINTS[1].location - _currentPoint.location);
+            }else if (i == totalPoints - 1)
+            {
+                _currentPoint.SetHandles(_currentPoint.location - _RETURN_POINTS[i-1].location);
+            }
+            else
+            {
+                _currentPoint.SetHandles(_RETURN_POINTS[i+1].location - _RETURN_POINTS[i-1].location);
+            }
+        }
+        bezierPath.MeasurePath();
     }
 
     public void AddTrain(float _position)

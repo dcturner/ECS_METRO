@@ -8,8 +8,9 @@ public class TrainCarriage : MonoBehaviour
 {
 
     public const float CARRIAGE_LENGTH = 5f;
-    public const float CARRIAGE_SPACING = 0.2f;
-    
+    public const float CARRIAGE_SPACING = 1f;
+
+    public float positionOnRail;
     public List<Commuter> passengers;
     public int passengerCount;
     public TrainCarriage_door door_LEFT;
@@ -25,13 +26,10 @@ public class TrainCarriage : MonoBehaviour
 //        mat = GetComponent<Renderer>().material;
     }
 
-    public void Set_Position(Vector3 _pos)
+    public void UpdateCarriage(float _newPositionOnRail, Vector3 _newPos, Vector3 _newRotation)
     {
-        t.position = _pos;
-    }
-    public void Set_Rotation(Vector3 _rot)
-    {
-//        t.localEulerAngles = new Vector3(0f,_rot.x * 360f, 0f);
-        t.LookAt(t.position - _rot);
+        positionOnRail = _newPositionOnRail;
+        t.position = _newPos;
+        t.LookAt(t.position - _newRotation);
     }
 }

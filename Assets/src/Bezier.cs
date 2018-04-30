@@ -11,6 +11,7 @@ public class BezierPath
     public BezierPath()
     {
         points = new List<BezierPoint>();
+        distance = 0f;
     }
 
     public BezierPoint AddPoint(Vector3 _location)
@@ -22,7 +23,6 @@ public class BezierPath
             BezierPoint _prev = points[points.Count - 2];
             BezierPoint _current = points[points.Count - 1];
             SetHandles(_current, _prev.location);
-            SetPointDistance(_current, _prev);
         }
 
         return result;
@@ -31,63 +31,44 @@ public class BezierPath
     void SetHandles(BezierPoint _point, Vector3 _prevPointLocation)
     {
         Vector3 _pointLocation = _point.location;
-        Vector3 _dist_prev_to_next = (_point.location - _prevPointLocation) / Metro.BEZIER_DISTANCE_SMOOTHING;
+        Vector3 _dist_PREV_CURRENT = Vector3.Normalize(_point.location - _prevPointLocation);
 
-        _point.handle_in = _pointLocation - (_dist_prev_to_next * Metro.BEZIER_HANDLE_REACH);
-        _point.handle_out = _pointLocation + (_dist_prev_to_next * Metro.BEZIER_HANDLE_REACH);     
+        _point.SetHandles(_dist_PREV_CURRENT);     
     }
 
-    public void SetPointDistance(BezierPoint _currentPoint, BezierPoint _prevPoint) {
-            // Measure this new bezier point
-            float measurementIncrement = 1f / Metro.BEZIER_MEASUREMENT_SUBDIVISIONS;
-            float regionDistance = 0f;
-            for (int i = 0; i < Metro.BEZIER_MEASUREMENT_SUBDIVISIONS- 1; i++)
-            {
-                float _CURRENT_SUBDIV = i * measurementIncrement;
-                float _NEXT_SOBDIV = (i + 1) * measurementIncrement;
-                regionDistance += Vector3.Distance(BezierLerp(_prevPoint, _currentPoint, _CURRENT_SUBDIV),
-                    BezierLerp(_prevPoint, _currentPoint, _NEXT_SOBDIV));
-            }
-
-            distance += regionDistance;
-            _currentPoint.distanceAlongPath = distance;
-    }
-
-    // Add the final region distance (from last point back to first point
-    public void CloseLoop()
+    public void MeasurePath()
     {
-        // easy acces vars
-        int _FINAL_INDEX = points.Count - 1;
-        BezierPoint _firstPoint = points[0];
-        Vector3 _firstPoint_POS = _firstPoint.location;
-        BezierPoint _secondPoint = points[1];
-        Vector3 _secondPoint_POS = _secondPoint.location;
-        BezierPoint _lastPoint = points[_FINAL_INDEX];
-        
-        
-        // Fix the start's handles
-        Vector3 dist_p0_to_p1 = _secondPoint_POS - _firstPoint_POS;
-        SetHandles(_firstPoint, _firstPoint_POS - dist_p0_to_p1);
-        // Fix the returnStart's handles
-        int index_returnOne = Mathf.FloorToInt(points.Count / 2);
-        BezierPoint _returnOnePoint = points[index_returnOne];
-        BezierPoint _returnTwoPoint = points[index_returnOne+1];
-        Vector3 _returnOne_POS = _returnOnePoint.location;
-        Vector3 dist_r0_to_r1 = points[index_returnOne+1].location - _returnOne_POS;
-        SetHandles(_returnOnePoint, _returnOne_POS - dist_r0_to_r1);
-         
-        
-        // add final region distance (END to START)
+        distance = 0f;
+        points[0].distanceAlongPath = 0.000001f;
+        for (int i = 1; i < points.Count; i++)
+        {
+            MeasurePoint(i, i-1);
+        }
+        // add last stretch (return loop to point ZERO)
+        distance += Get_AccurateDistanceBetweenPoints(0, points.Count - 1);
+    }
+
+    public float Get_AccurateDistanceBetweenPoints(int _current, int _prev)
+    {
+        BezierPoint _currentPoint = points[_current];
+        BezierPoint _prevPoint = points[_prev];
         float measurementIncrement = 1f / Metro.BEZIER_MEASUREMENT_SUBDIVISIONS;
         float regionDistance = 0f;
-        for (int i = 0; i < Metro.BEZIER_MEASUREMENT_SUBDIVISIONS - 1; i++)
+        for (int i = 0; i < Metro.BEZIER_MEASUREMENT_SUBDIVISIONS- 1; i++)
         {
             float _CURRENT_SUBDIV = i * measurementIncrement;
             float _NEXT_SOBDIV = (i + 1) * measurementIncrement;
-            regionDistance += Vector3.Distance(BezierLerp(_lastPoint,_firstPoint, _CURRENT_SUBDIV),
-                BezierLerp(_lastPoint, _firstPoint, _NEXT_SOBDIV));
+            regionDistance += Vector3.Distance(BezierLerp(_prevPoint, _currentPoint, _CURRENT_SUBDIV),
+                BezierLerp(_prevPoint, _currentPoint, _NEXT_SOBDIV));
         }
-        distance += regionDistance;
+
+        return regionDistance;
+    }
+
+    public void MeasurePoint(int _currentPoint, int _prevPoint) {
+            distance += Get_AccurateDistanceBetweenPoints(_currentPoint, _prevPoint);
+            points[_currentPoint].distanceAlongPath = distance;
+        Debug.Log("point["+_currentPoint+"], distance " + distance);
     }
 
     public Vector3 Get_NormalAtPosition(float _position)
@@ -190,5 +171,12 @@ public class BezierPoint
         handle_in = _handle_in;
         handle_out = _handle_out;
         tags = new List<string>();
+    }
+
+    public void SetHandles(Vector3 _distance)
+    {
+        _distance *= Metro.BEZIER_HANDLE_REACH;
+        handle_in = location - _distance;
+        handle_out = location + _distance;
     }
 }

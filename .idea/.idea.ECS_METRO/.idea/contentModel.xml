@@ -17,7 +17,6 @@
           <e p="Bezier.cs" t="Include" />
           <e p="Commuter.cs" t="Include" />
           <e p="EditorTools" t="Include">
-            <e p="PathBuilder.cs" t="Include" />
             <e p="RailMarker.cs" t="Include" />
           </e>
           <e p="Metro.cs" t="Include" />

@@ -8,9 +8,8 @@ public class Metro : MonoBehaviour
 {
     public static float CUSTOMER_SATISFACTION = 1f;
     public static float BEZIER_HANDLE_REACH = 0.1f;
-    public static float BEZIER_DISTANCE_SMOOTHING = 0.95f;
     public static float BEZIER_PLATFORM_OFFSET = 3f;
-    public const int BEZIER_MEASUREMENT_SUBDIVISIONS = 100;
+    public const int BEZIER_MEASUREMENT_SUBDIVISIONS = 2000;
     public static Metro INSTANCE;
     
     
@@ -19,7 +18,6 @@ public class Metro : MonoBehaviour
     public GameObject prefab_trainCarriage;
     [Range(0f,1f)]
     public float Bezier_HandleReach = 0.3f;
-    public float Bezier_DistanceSmoothing = 0.95f;
     public float Bezier_PlatformOffset = 3f;
     
     public string[] LineNames;
@@ -70,7 +68,6 @@ public class Metro : MonoBehaviour
     private void Start()
     {
         BEZIER_HANDLE_REACH = Bezier_HandleReach;
-        BEZIER_DISTANCE_SMOOTHING = Bezier_DistanceSmoothing;
         BEZIER_PLATFORM_OFFSET = Bezier_PlatformOffset;
         SetupMetroLines();
         SetupTrains();
@@ -165,11 +162,14 @@ public class Metro : MonoBehaviour
                         // Link them up
                         Handles.DrawBezier(_CURRENT_POINT.location, _NEXT_POINT.location, _CURRENT_POINT.handle_out,
                             _NEXT_POINT.handle_in, GetLine_COLOUR_FromIndex(i), null, 3f);
-
+                        float currentPointDistance = _CURRENT_POINT.distanceAlongPath;
+                        Handles.Label(_CURRENT_POINT.location, currentPointDistance.ToString("##.##") + " / " + _path.GetPathDistance().ToString("##.##"));
                     }
                 }
             }
         }
+        
+        
     }
 
     #endregion ------------------------ GIZMOS >

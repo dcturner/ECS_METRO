@@ -58,7 +58,6 @@
     <Compile Include="Assets\src\Behaviours\Friction.cs" />
     <Compile Include="Assets\src\Bezier.cs" />
     <Compile Include="Assets\src\Commuter.cs" />
-    <Compile Include="Assets\src\EditorTools\PathBuilder.cs" />
     <Compile Include="Assets\src\EditorTools\RailMarker.cs" />
     <Compile Include="Assets\src\Metro.cs" />
     <Compile Include="Assets\src\MetroLine.cs" />

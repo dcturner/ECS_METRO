@@ -113,15 +113,43 @@ public class Train
         currentPosition = (currentPosition + parentLine.train_accelerationStrength) % 1f;
         
         float carriageLength_asRailDistance = parentLine.Get_distanceAsRailProportion(TrainCarriage.CARRIAGE_LENGTH);
-        for (int i = 0; i < totalCarriages; i++)
+        float _REAL_CARRIAGE_LENGTH = TrainCarriage.CARRIAGE_LENGTH + TrainCarriage.CARRIAGE_SPACING;
+        carriages[0].UpdateCarriage(currentPosition, parentLine.Get_PositionOnRail(currentPosition), parentLine.Get_RotationOnRail(currentPosition));
+        for (int i = 1; i < totalCarriages; i++)
         {
-            float carriageLengths = i * carriageLength_asRailDistance;
-            float carriageSpacings = i * _carriageSpacing;
-            float carriagePosition = currentPosition + (carriageLengths + carriageSpacings);
-            TrainCarriage _TC = carriages[i];
-            
-            _TC.Set_Position(parentLine.Get_PositionOnRail(carriagePosition));
-            _TC.Set_Rotation(parentLine.Get_RotationOnRail(carriagePosition));
+            TrainCarriage _current = carriages[i];
+            TrainCarriage _prev = carriages[i - 1];
+            Vector3 _prev_POS = _prev.transform.position;
+            float carriageRailPosition = _prev.positionOnRail;
+            Vector3 _current_POS = parentLine.Get_PositionOnRail(carriageRailPosition);
+            float realDistanceFromPrevious = Vector3.Distance(_current_POS, _prev_POS);
+            int attempts = 1000;
+            for (int j = 0; j < attempts; j++)
+            {
+                if(realDistanceFromPrevious < (_REAL_CARRIAGE_LENGTH))
+                {
+                    carriageRailPosition -= 0.0001f;
+                    if (carriageRailPosition < 0)
+                    {
+                        carriageRailPosition += 1f;
+                    }
+
+                    _current_POS = parentLine.Get_PositionOnRail(carriageRailPosition);
+                    realDistanceFromPrevious = Vector3.Distance(_current_POS, _prev_POS);
+                } else {
+                    break;
+                }
+            }
+//            while (realDistanceFromPrevious < (_REAL_CARRIAGE_LENGTH + _THRESHOLD) || attempts > 0)
+//            {
+//                attempts--;
+//                Debug.Log("Real dist from previous: " + realDistanceFromPrevious);
+//                carriageRailPosition = (carriageRailPosition - 0.1f) % 1f;
+//                _current_POS = parentLine.Get_PositionOnRail(carriageRailPosition);
+//                realDistanceFromPrevious = Vector3.Distance(_current_POS, _prev_POS);
+//            }
+            _current.UpdateCarriage(carriageRailPosition, _current_POS, parentLine.Get_RotationOnRail(carriageRailPosition));
+    
         }
     }
 }

@@ -142,14 +142,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   prefab_trainCarriage: {fileID: 1005656507454012, guid: 7913530af20624429bc67f560aa729fc,
     type: 2}
-  Bezier_HandleReach: 0.05
+  Bezier_HandleReach: 0.1
   Bezier_DistanceSmoothing: 1
+  Bezier_PlatformOffset: 5
   LineNames:
   - RED LINE
   - TEAL LINE
   - ORANGE LINE
-  maxTrains: 050000000500000005000000
-  carriagesPerTrain: 040000000200000003000000
+  maxTrains: 010000000500000005000000
+  carriagesPerTrain: 0a0000000200000003000000
   trainCarriageSpacing:
   - 0.1
   - 0.1
