@@ -16,7 +16,7 @@ public class BezierPath
 
     public BezierPoint AddPoint(Vector3 _location)
     {
-        BezierPoint result = new BezierPoint(_location, _location, _location);
+        BezierPoint result = new BezierPoint(points.Count, _location, _location, _location);
         points.Add(result);
         if (points.Count > 1)
         {
@@ -90,44 +90,13 @@ public class BezierPath
 
     public Vector3 Get_Position(float _progress)
     {
-        int totalPoints = points.Count;
-
         float progressDistance = distance * _progress;
+        int pointIndex_region_start = GetRegionIndex(progressDistance);
+        int pointIndex_region_end = (pointIndex_region_start + 1) % points.Count;
 
-        // Figure out the wrapper points
-        BezierPoint point_region_start = points[0];
-        BezierPoint point_region_end = points[1];
-        int pointIndex_region_start = 0;
-        int pointIndex_region_end = 0;
-        for (int i = 0; i < totalPoints; i++)
-        {
-            BezierPoint _PT = points[pointIndex_region_start];
-            if (_PT.distanceAlongPath <= _progress)
-            {
-                if (i == totalPoints - 1)
-                {
-                    // end wrap
-                    pointIndex_region_start = i;
-                    pointIndex_region_end = 0;
-                    break;
-                }
-                else if (points[i + 1].distanceAlongPath >= progressDistance)
-                {
-                    // start < progress, end > progress <-- thats a match
-                    pointIndex_region_start = i;
-                    pointIndex_region_end = i + 1;
-                    break;
-                }
-                else
-                {
-                    continue;
-                }
-            }
-        }
-
-        // get start and end bex points
-        point_region_start = points[pointIndex_region_start];
-        point_region_end = points[pointIndex_region_end];
+        // get start and end bez points
+        BezierPoint point_region_start = points[pointIndex_region_start];
+        BezierPoint point_region_end = points[pointIndex_region_end];
         // lerp between the points to arrive at PROGRESS
         float pathProgress_start = point_region_start.distanceAlongPath / distance;
         float pathProgress_end = (pointIndex_region_end != 0) ?  point_region_end.distanceAlongPath / distance : 1f;
@@ -136,6 +105,36 @@ public class BezierPath
         // do your bezier lerps
         // Round 1 --> Origins to handles, handle to handle
         return BezierLerp(point_region_start, point_region_end, regionProgress);
+    }
+
+    public int GetRegionIndex(float _progress)
+    {
+        int result = 0;
+        int totalPoints = points.Count;
+        for (int i = 0; i < totalPoints; i++)
+        {
+            BezierPoint _PT = points[i];
+            if (_PT.distanceAlongPath <= _progress)
+            {
+                if (i == totalPoints - 1)
+                {
+                    // end wrap
+                    result = i;
+                    break;
+                }
+                else if (points[i + 1].distanceAlongPath >= _progress)
+                {
+                    // start < progress, end > progress <-- thats a match
+                    result = i;
+                    break;
+                }
+                else
+                {
+                    continue;
+                }
+            }
+        }
+        return result;
     }
 
     public Vector3 BezierLerp(BezierPoint _pointA, BezierPoint _pointB, float _progress)
@@ -160,12 +159,14 @@ public class BezierPath
 
 public class BezierPoint
 {
+    public int index;
     public Vector3 location, handle_in, handle_out;
     public float distanceAlongPath = 0f;
     public List<string> tags;
 
-    public BezierPoint(Vector3 _location, Vector3 _handle_in, Vector3 _handle_out)
+    public BezierPoint(int _index, Vector3 _location, Vector3 _handle_in, Vector3 _handle_out)
     {
+        index = _index;
         location = _location;
         handle_in = _handle_in;
         handle_out = _handle_out;

@@ -20,11 +20,22 @@ public class Metro : MonoBehaviour
     [Range(0f,1f)]
     public float Bezier_HandleReach = 0.3f;
     public float Bezier_PlatformOffset = 3f;
+    [Header("Trains")]
+    public float Train_accelerationStrength = 0.001f;
+    public float Train_brakeStrength = 0.01f;
+    public float Train_railFriction = 0.99f;
+    public float Train_delay_doors_OPEN = 2f;
+    public float Train_delay_doors_CLOSE = 1f;
+    public float Train_delay_departure = 1f;
+    [Header("Commuters")]
+    // walk speed etc
     
+    [Header("MetroLines")]
     public string[] LineNames;
     public int[] maxTrains;
     public int[] carriagesPerTrain;
     public float[] trainCarriageSpacing;
+    public float[] maxTrainSpeed;
     private int totalLines = 0;
     public Color[] LineColours;
 

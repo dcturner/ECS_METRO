@@ -56,6 +56,7 @@
     <Compile Include="Assets\src\Behaviours\Approach.cs" />
     <Compile Include="Assets\src\Behaviours\Colour.cs" />
     <Compile Include="Assets\src\Behaviours\Friction.cs" />
+    <Compile Include="Assets\src\Behaviours\Timer.cs" />
     <Compile Include="Assets\src\Bezier.cs" />
     <Compile Include="Assets\src\Commuter.cs" />
     <Compile Include="Assets\src\EditorTools\CommuterNavPoint.cs" />

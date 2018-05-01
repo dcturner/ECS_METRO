@@ -13,6 +13,7 @@
             <e p="Approach.cs" t="Include" />
             <e p="Colour.cs" t="Include" />
             <e p="Friction.cs" t="Include" />
+            <e p="Timer.cs" t="Include" />
           </e>
           <e p="Bezier.cs" t="Include" />
           <e p="Commuter.cs" t="Include" />

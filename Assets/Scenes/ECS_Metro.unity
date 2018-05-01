@@ -212,16 +212,26 @@ MonoBehaviour:
     type: 2}
   Bezier_HandleReach: 0.2
   Bezier_PlatformOffset: 8
+  Train_accelerationStrength: 0.000001
+  Train_brakeStrength: 0.01
+  Train_railFriction: 1
+  Train_delay_doors_OPEN: 1
+  Train_delay_doors_CLOSE: 1
+  Train_delay_departure: 2
   LineNames:
   - RED LINE
   - TEAL LINE
   - ORANGE LINE
-  maxTrains: 0f0000000a00000005000000
+  maxTrains: 050000000500000005000000
   carriagesPerTrain: 030000000300000003000000
   trainCarriageSpacing:
   - 0.1
   - 0.1
   - 0.1
+  maxTrainSpeed:
+  - 0.00075
+  - 0.00025
+  - 0.00025
   LineColours:
   - {r: 1, g: 0.2216981, b: 0.2216981, a: 1}
   - {r: 0.1273585, g: 1, b: 0.51499337, a: 1}

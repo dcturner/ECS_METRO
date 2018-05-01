@@ -15,18 +15,21 @@ public class MetroLine  {
     public List<Train> trains;
     public List<Platform> platforms;
     public int maxTrains;
+    public float maxTrainSpeed;
     public Vector3[] railPath;
     public int carriagesPerTrain;
     public float trainCarriageSpacing = 0.1f;
     public float train_accelerationStrength = 0.0003f;
     public float train_brakeStrength = 0.01f;
     public float train_friction = 0.95f;
+    public float speedRatio;
 
     public MetroLine(int _index, int _maxTrains)
     {
         index = _index;
         maxTrains = _maxTrains;
         trains = new List<Train>();
+        platforms = new List<Platform>();
         Update_ValuesFromMetro();
     }
 
@@ -42,10 +45,7 @@ public class MetroLine  {
         }
 
         trainCarriageSpacing = m.trainCarriageSpacing[index];
-
-//        train_accelerationStrength = m.LineNames[index];
-//        train_brakeStrength= m.LineNames[index];
-//        train_friction= m.LineNames[index];
+        maxTrainSpeed = m.maxTrainSpeed[index];
     }
 
     public void Create_RailPath(List<RailMarker> _outboundPoints) {
@@ -121,6 +121,8 @@ public class MetroLine  {
                 _opposirePlatform.transform.eulerAngles = _ouboundPlatform.transform.rotation.eulerAngles + new Vector3(0f, 180f, 0f);;
             }
         }
+
+        speedRatio = bezierPath.GetPathDistance() * maxTrainSpeed;
     }
 
     Platform AddPlatform(int _index_platform_START, int _index_platform_END)
@@ -134,6 +136,7 @@ public class MetroLine  {
         platform_OBJ.transform.LookAt(bezierPath.GetPoint_PerpendicularOffset(_PT_END, -3f));
         platform.parentMetroLine = this;
         platform.SetColour();
+        platforms.Add(platform);
         return platform;
     }
 
@@ -163,5 +166,36 @@ public class MetroLine  {
     public float Get_distanceAsRailProportion (float _realDistance)
     {
         return _realDistance / bezierPath.GetPathDistance();
+    }
+
+    public float Get_proportionAsDistance(float _proportion)
+    {
+        return bezierPath.GetPathDistance() * _proportion;
+    }
+
+    public int Get_RegionIndex(float _proportion)
+    {
+        return bezierPath.GetRegionIndex(Get_proportionAsDistance(_proportion));
+    }
+
+    public Platform Get_NextPlatform(float _currentPosition)
+    {
+        Platform result = null;
+        int currentRegionIndex = Get_RegionIndex(_currentPosition);
+        int totalPoints = bezierPath.points.Count;
+        for (int i = 0; i < totalPoints; i++)
+        {
+            int _TEST_INDEX = ((currentRegionIndex + i) % totalPoints);
+            Debug.Log("nextPlat from " + _currentPosition + ", regIndex("+currentRegionIndex+"), testIndex: " + _TEST_INDEX);
+            foreach (Platform _P in platforms)
+            {
+                if (_P.point_platform_END.index == _TEST_INDEX)
+                {
+                    result = _P;
+                    break;
+                }
+            }
+        }
+        return result;
     }
 }

@@ -23,13 +23,16 @@ public class Train
     public int passengerCount;
     public int passengersLeavingAtNextStop = 0;
     private float currentPosition = 0f;
+    private int currentRegion;
     public float speed = 0f;
+    public float accelerationStrength, brakeStrength, railFriction;
+    public float stateDelay = 0f;
     public int parentLineIndex;
+    public bool isOutbound;
     public TrainState state;
-    public float timeInCurrentState = 0f;
     public MetroLine parentLine;
     public Platform platform_NEXT;
-
+    
     public Train(int _parentLineIndex, float _startPosition, int _totalCarriages)
     {
         parentLineIndex = _parentLineIndex;
@@ -38,6 +41,11 @@ public class Train
         state = TrainState.EN_ROUTE;
         totalCarriages = _totalCarriages;
         SetupCarriages();
+        speed = 0f;
+        accelerationStrength = Metro.INSTANCE.Train_accelerationStrength * parentLine.speedRatio;
+        brakeStrength = Metro.INSTANCE.Train_brakeStrength;
+        railFriction = Metro.INSTANCE.Train_railFriction;
+        ChangeState(TrainState.DEPARTING);
     }
 
     void SetupCarriages()
@@ -51,8 +59,16 @@ public class Train
         }
     }
 
+    void Update_NextPlatform()
+    {
+        platform_NEXT = parentLine.Get_NextPlatform(currentPosition);
+        Debug.Log("platform_NEXT: " + platform_NEXT.point_platform_END.index);
+    }
+
+
     void ChangeState(TrainState _newState)
     {
+        state = _newState;
         switch (_newState)
         {
             case TrainState.EN_ROUTE:
@@ -64,6 +80,7 @@ public class Train
                 break;
             case TrainState.DOORS_OPEN:
                 // slight delay, then open the required door
+                stateDelay = Metro.INSTANCE.Train_delay_doors_OPEN;
                 break;
             case TrainState.UNLOADING:
                 // tell commuters they can leave
@@ -74,16 +91,20 @@ public class Train
                 break;
             case TrainState.DOORS_CLOSE:
                 // once totalPassengers == (totalPassengers + (waitingToBoard - availableSpaces)) - shut the doors
+                stateDelay = Metro.INSTANCE.Train_delay_doors_CLOSE;
                 // sort out vars for next stop (nextPlatform, door side, passengers wanting to get off etc)
                 break;
             case TrainState.DEPARTING:
-                // slight delay, then increase up to top speed
+                // slight delay
+                // Determine next platform / station we'll be stopping at
+                Debug.Log("TrainL currentPos: " + currentPosition);
+                Update_NextPlatform();
+                // get list of passengers who wish to depart at the next stop
+                stateDelay = Metro.INSTANCE.Train_delay_departure;
                 break;
             case TrainState.EMERGENCY_STOP:
                 break;
         }
-
-        timeInCurrentState = 0f;
     }
 
     public void Update(float _carriageSpacing)
@@ -91,26 +112,53 @@ public class Train
         switch (state)
         {
             case TrainState.EN_ROUTE:
+                if (speed <= parentLine.maxTrainSpeed)
+                {
+                    speed += accelerationStrength;
+                }
+
                 break;
             case TrainState.ARRIVING:
                 break;
             case TrainState.DOORS_OPEN:
+                
+                if (Timer.TimerReachedZero(ref stateDelay))
+                {
+
+                }
+
                 break;
             case TrainState.UNLOADING:
+                // alert passengers in departing list
+                // get list of passengers that will be boarding
                 break;
             case TrainState.LOADING:
+                // when all boardees are inside
                 break;
             case TrainState.DOORS_CLOSE:
+                if (Timer.TimerReachedZero(ref stateDelay))
+                {
+
+                }
                 break;
-            case TrainState.DEPARTING:
+            case TrainState.DEPARTING:    
+                // slight delay
+                // Determine next platform / station we'll be stopping at
+                // get list of passengers who wish to depart at the next stop
+                if (Timer.TimerReachedZero(ref stateDelay))
+                {
+                    ChangeState(TrainState.EN_ROUTE);
+                }
                 break;
             case TrainState.EMERGENCY_STOP:
                 break;
+
+
         }
-
-        timeInCurrentState += Time.deltaTime;
-
-        currentPosition = (currentPosition + parentLine.train_accelerationStrength) % 1f;
+                currentPosition = ((currentPosition += speed) % 1f);
+                isOutbound = currentPosition >= 0.5f;
+                speed *= railFriction;
+        
         
         float carriageLength_asRailDistance = parentLine.Get_distanceAsRailProportion(TrainCarriage.CARRIAGE_LENGTH);
         float _REAL_CARRIAGE_LENGTH = TrainCarriage.CARRIAGE_LENGTH + TrainCarriage.CARRIAGE_SPACING;
