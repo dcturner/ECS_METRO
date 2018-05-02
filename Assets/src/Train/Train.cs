@@ -17,6 +17,7 @@ public enum TrainState
 
 public class Train
 {
+    public int trainIndex;
     public List<TrainCarriage> carriages;
     public int totalCarriages;
     public List<Commuter> passengers;
@@ -25,6 +26,7 @@ public class Train
     private float currentPosition = 0f;
     private int currentRegion;
     public float speed = 0f;
+    public float speed_on_platform_arrival = 0f;
     public float accelerationStrength, brakeStrength, railFriction;
     public float stateDelay = 0f;
     public int parentLineIndex;
@@ -32,9 +34,11 @@ public class Train
     public TrainState state;
     public MetroLine parentLine;
     public Platform platform_NEXT;
-    
-    public Train(int _parentLineIndex, float _startPosition, int _totalCarriages)
+    public Train trainAheadOfMe;
+
+    public Train(int _trainIndex, int _parentLineIndex, float _startPosition, int _totalCarriages)
     {
+        trainIndex = _trainIndex;
         parentLineIndex = _parentLineIndex;
         parentLine = Metro.INSTANCE.metroLines[parentLineIndex];
         currentPosition = _startPosition;
@@ -53,7 +57,7 @@ public class Train
         carriages = new List<TrainCarriage>();
         for (int i = 0; i < totalCarriages; i++)
         {
-            GameObject _tempCarriage_OBJ =  (GameObject) Metro.Instantiate(Metro.INSTANCE.prefab_trainCarriage);
+            GameObject _tempCarriage_OBJ = (GameObject) Metro.Instantiate(Metro.INSTANCE.prefab_trainCarriage);
             TrainCarriage _TC = _tempCarriage_OBJ.GetComponent<TrainCarriage>();
             carriages.Add(_TC);
         }
@@ -62,7 +66,6 @@ public class Train
     void Update_NextPlatform()
     {
         platform_NEXT = parentLine.Get_NextPlatform(currentPosition);
-        Debug.Log("platform_NEXT: " + platform_NEXT.point_platform_END.index);
     }
 
 
@@ -77,9 +80,12 @@ public class Train
             case TrainState.ARRIVING:
                 // slow down and then stop at the end of the platform
                 // tell commuters on platform about available carriage spaces
+                speed_on_platform_arrival = speed;
                 break;
             case TrainState.DOORS_OPEN:
                 // slight delay, then open the required door
+                Debug.Log("ARRIVED! - doors about to open");
+                speed = 0f;
                 stateDelay = Metro.INSTANCE.Train_delay_doors_OPEN;
                 break;
             case TrainState.UNLOADING:
@@ -97,7 +103,6 @@ public class Train
             case TrainState.DEPARTING:
                 // slight delay
                 // Determine next platform / station we'll be stopping at
-                Debug.Log("TrainL currentPos: " + currentPosition);
                 Update_NextPlatform();
                 // get list of passengers who wish to depart at the next stop
                 stateDelay = Metro.INSTANCE.Train_delay_departure;
@@ -117,14 +122,32 @@ public class Train
                     speed += accelerationStrength;
                 }
 
+                if (parentLine.Get_RegionIndex(currentPosition) == platform_NEXT.point_platform_START.index)
+                {
+                    ChangeState(TrainState.ARRIVING);
+                }
+
                 break;
             case TrainState.ARRIVING:
+
+                float _platform_start = platform_NEXT.point_platform_START.distanceAlongPath;
+                float _platform_end = platform_NEXT.point_platform_END.distanceAlongPath;
+                float _platform_length = _platform_end - _platform_start;
+                float arrivalProgress = (parentLine.Get_proportionAsDistance(currentPosition) - _platform_start) /
+                                        _platform_length;
+                arrivalProgress = 1f - Mathf.Cos(arrivalProgress * Mathf.PI * 0.5f);
+                speed = speed_on_platform_arrival * (1f - arrivalProgress);
+
+                if (arrivalProgress >= 0.99f)
+                {
+                    ChangeState(TrainState.DOORS_OPEN);
+                }
+
                 break;
             case TrainState.DOORS_OPEN:
-                
+
                 if (Timer.TimerReachedZero(ref stateDelay))
                 {
-
                 }
 
                 break;
@@ -138,10 +161,10 @@ public class Train
             case TrainState.DOORS_CLOSE:
                 if (Timer.TimerReachedZero(ref stateDelay))
                 {
-
                 }
+
                 break;
-            case TrainState.DEPARTING:    
+            case TrainState.DEPARTING:
                 // slight delay
                 // Determine next platform / station we'll be stopping at
                 // get list of passengers who wish to depart at the next stop
@@ -149,20 +172,24 @@ public class Train
                 {
                     ChangeState(TrainState.EN_ROUTE);
                 }
+
                 break;
             case TrainState.EMERGENCY_STOP:
                 break;
-
-
         }
-                currentPosition = ((currentPosition += speed) % 1f);
-                isOutbound = currentPosition >= 0.5f;
-                speed *= railFriction;
-        
-        
+
+        currentPosition = ((currentPosition += speed) % 1f);
+        isOutbound = currentPosition <= 0.5f;
+        speed *= railFriction;
+        UpdateCarriages();
+    }
+
+    void UpdateCarriages()
+    {
         float carriageLength_asRailDistance = parentLine.Get_distanceAsRailProportion(TrainCarriage.CARRIAGE_LENGTH);
         float _REAL_CARRIAGE_LENGTH = TrainCarriage.CARRIAGE_LENGTH + TrainCarriage.CARRIAGE_SPACING;
-        carriages[0].UpdateCarriage(currentPosition, parentLine.Get_PositionOnRail(currentPosition), parentLine.Get_RotationOnRail(currentPosition));
+        carriages[0].UpdateCarriage(currentPosition, parentLine.Get_PositionOnRail(currentPosition),
+            parentLine.Get_RotationOnRail(currentPosition));
         for (int i = 1; i < totalCarriages; i++)
         {
             TrainCarriage _current = carriages[i];
@@ -174,7 +201,7 @@ public class Train
             int attempts = 1000;
             for (int j = 0; j < attempts; j++)
             {
-                if(realDistanceFromPrevious < (_REAL_CARRIAGE_LENGTH))
+                if (realDistanceFromPrevious < (_REAL_CARRIAGE_LENGTH))
                 {
                     carriageRailPosition -= 0.0001f;
                     if (carriageRailPosition < 0)
@@ -184,20 +211,14 @@ public class Train
 
                     _current_POS = parentLine.Get_PositionOnRail(carriageRailPosition);
                     realDistanceFromPrevious = Vector3.Distance(_current_POS, _prev_POS);
-                } else {
+                }
+                else
+                {
                     break;
                 }
             }
-//            while (realDistanceFromPrevious < (_REAL_CARRIAGE_LENGTH + _THRESHOLD) || attempts > 0)
-//            {
-//                attempts--;
-//                Debug.Log("Real dist from previous: " + realDistanceFromPrevious);
-//                carriageRailPosition = (carriageRailPosition - 0.1f) % 1f;
-//                _current_POS = parentLine.Get_PositionOnRail(carriageRailPosition);
-//                realDistanceFromPrevious = Vector3.Distance(_current_POS, _prev_POS);
-//            }
-            _current.UpdateCarriage(carriageRailPosition, _current_POS, parentLine.Get_RotationOnRail(carriageRailPosition));
-    
+            _current.UpdateCarriage(carriageRailPosition, _current_POS,
+                parentLine.Get_RotationOnRail(carriageRailPosition));
         }
     }
 }

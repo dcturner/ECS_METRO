@@ -229,7 +229,7 @@ MonoBehaviour:
   - 0.1
   - 0.1
   maxTrainSpeed:
-  - 0.00075
+  - 0.001
   - 0.00025
   - 0.00025
   LineColours:

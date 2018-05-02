@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -9,7 +10,7 @@ using UnityEngine;
 public class MetroLine  {
  
     public string lineName;
-    public int index;
+    public int metroLine_index;
     public Color lineColour;
     public BezierPath bezierPath;
     public List<Train> trains;
@@ -24,9 +25,9 @@ public class MetroLine  {
     public float train_friction = 0.95f;
     public float speedRatio;
 
-    public MetroLine(int _index, int _maxTrains)
+    public MetroLine(int metroLineIndex, int _maxTrains)
     {
-        index = _index;
+        metroLine_index = metroLineIndex;
         maxTrains = _maxTrains;
         trains = new List<Train>();
         platforms = new List<Platform>();
@@ -36,16 +37,16 @@ public class MetroLine  {
     void Update_ValuesFromMetro()
     {
         Metro m = Metro.INSTANCE;
-        lineName = m.LineNames[index];
-        lineColour = m.LineColours[index];
-        carriagesPerTrain = m.carriagesPerTrain[index];
+        lineName = m.LineNames[metroLine_index];
+        lineColour = m.LineColours[metroLine_index];
+        carriagesPerTrain = m.carriagesPerTrain[metroLine_index];
         if (carriagesPerTrain <= 0)
         {
             carriagesPerTrain = 1;
         }
 
-        trainCarriageSpacing = m.trainCarriageSpacing[index];
-        maxTrainSpeed = m.maxTrainSpeed[index];
+        trainCarriageSpacing = m.trainCarriageSpacing[metroLine_index];
+        maxTrainSpeed = m.maxTrainSpeed[metroLine_index];
     }
 
     public void Create_RailPath(List<RailMarker> _outboundPoints) {
@@ -110,15 +111,19 @@ public class MetroLine  {
         int totalPoints = bezierPath.points.Count;
         for (int i = 1; i < _outboundPoints.Count; i++)
         {
-            if (_outboundPoints[i].railMarkerType == RailMarkerType.PLATFORM_END &&
-                _outboundPoints[i-1].railMarkerType == RailMarkerType.PLATFORM_START)
+            int _plat_END = i;
+            int _plat_START = i - 1;
+            if (_outboundPoints[_plat_END].railMarkerType == RailMarkerType.PLATFORM_END &&
+                _outboundPoints[_plat_START].railMarkerType == RailMarkerType.PLATFORM_START)
             {
-                Platform _ouboundPlatform = AddPlatform(i-1, i);
+                Platform _ouboundPlatform = AddPlatform(_plat_START, _plat_END);
                 // now add an opposite platform!
-                int opposite_START = totalPoints - (i-1);
+                int opposite_START = totalPoints - (i+1);
                 int opposite_END = totalPoints - i;
                 Platform _opposirePlatform = AddPlatform(opposite_START, opposite_END);
-                _opposirePlatform.transform.eulerAngles = _ouboundPlatform.transform.rotation.eulerAngles + new Vector3(0f, 180f, 0f);;
+//                _opposirePlatform.transform.eulerAngles = _ouboundPlatform.transform.rotation.eulerAngles + new Vector3(0f, 180f, 0f);;
+                Debug.Log("-- added outbound platform: start: " +_plat_START+", end:"+_plat_END);
+                Debug.Log("opposite platform: start: " +opposite_START+", end:"+opposite_END);
             }
         }
 
@@ -140,9 +145,9 @@ public class MetroLine  {
         return platform;
     }
 
-    public void AddTrain(float _position)
+    public void AddTrain(int _trainIndex, float _position)
     {
-        trains.Add(new Train(index, _position, carriagesPerTrain));
+        trains.Add(new Train(_trainIndex, metroLine_index, _position, carriagesPerTrain));
     }
 
     public void UpdateTrains()
@@ -181,21 +186,24 @@ public class MetroLine  {
     public Platform Get_NextPlatform(float _currentPosition)
     {
         Platform result = null;
-        int currentRegionIndex = Get_RegionIndex(_currentPosition);
         int totalPoints = bezierPath.points.Count;
+        int currentRegionIndex = Get_RegionIndex(_currentPosition);
+        
+        // walk along the points and return the next END we encounter
         for (int i = 0; i < totalPoints; i++)
         {
-            int _TEST_INDEX = ((currentRegionIndex + i) % totalPoints);
-            Debug.Log("nextPlat from " + _currentPosition + ", regIndex("+currentRegionIndex+"), testIndex: " + _TEST_INDEX);
+            int testIndex = (currentRegionIndex + i) % totalPoints;
+             // is TEST INDEX a platform end?
+            
             foreach (Platform _P in platforms)
             {
-                if (_P.point_platform_END.index == _TEST_INDEX)
+                if (_P.point_platform_START.index == testIndex)
                 {
-                    result = _P;
-                    break;
+                    return _P;
                 }
             }
         }
+        
         return result;
     }
 }

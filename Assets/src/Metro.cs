@@ -9,7 +9,7 @@ public class Metro : MonoBehaviour
     public static float CUSTOMER_SATISFACTION = 1f;
     public static float BEZIER_HANDLE_REACH = 0.1f;
     public static float BEZIER_PLATFORM_OFFSET = 3f;
-    public const int BEZIER_MEASUREMENT_SUBDIVISIONS = 2000;
+    public const int BEZIER_MEASUREMENT_SUBDIVISIONS = 2;
     public static Metro INSTANCE;
     
     
@@ -131,6 +131,7 @@ public class Metro : MonoBehaviour
 
     void SetupTrains()
     {
+        // Add trains
         for (int i = 0; i < totalLines; i++)
         {
             if (metroLines[i] != null)
@@ -139,7 +140,20 @@ public class Metro : MonoBehaviour
                 float trainSpacing = 1f / _ML.maxTrains;
                 for (int trainIndex = 0; trainIndex < _ML.maxTrains; trainIndex++)
                 {
-                    _ML.AddTrain(trainIndex * trainSpacing);
+                    _ML.AddTrain(trainIndex, trainIndex * trainSpacing);
+                }
+            }
+        }
+        // now tell each train who is ahead of them
+        for (int i = 0; i < totalLines; i++)
+        {
+            if (metroLines[i] != null)
+            {
+                MetroLine _ML = metroLines[i];
+                for (int trainIndex = 0; trainIndex < _ML.maxTrains; trainIndex++)
+                {
+                    Train _T = _ML.trains[i];
+                    _T.trainAheadOfMe = _ML.trains[(i + 1) % _ML.maxTrains];
                 }
             }
         }
