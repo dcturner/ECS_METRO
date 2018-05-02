@@ -183,7 +183,7 @@ public class MetroLine  {
         return bezierPath.GetRegionIndex(Get_proportionAsDistance(_proportion));
     }
 
-    public Platform Get_NextPlatform(float _currentPosition)
+    public Platform Get_NextPlatform(float _currentPosition, Platform _currentPlatform = null)
     {
         Platform result = null;
         int totalPoints = bezierPath.points.Count;
@@ -194,10 +194,9 @@ public class MetroLine  {
         {
             int testIndex = (currentRegionIndex + i) % totalPoints;
              // is TEST INDEX a platform end?
-            
             foreach (Platform _P in platforms)
             {
-                if (_P.point_platform_START.index == testIndex)
+                if (_P.point_platform_START.index == testIndex && _currentPlatform != _P)
                 {
                     return _P;
                 }

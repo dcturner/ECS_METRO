@@ -33,7 +33,7 @@ public class Train
     public bool isOutbound;
     public TrainState state;
     public MetroLine parentLine;
-    public Platform platform_NEXT;
+    public Platform nextPlatform;
     public Train trainAheadOfMe;
 
     public Train(int _trainIndex, int _parentLineIndex, float _startPosition, int _totalCarriages)
@@ -65,7 +65,7 @@ public class Train
 
     void Update_NextPlatform()
     {
-        platform_NEXT = parentLine.Get_NextPlatform(currentPosition);
+        nextPlatform = parentLine.Get_NextPlatform(currentPosition, nextPlatform);
     }
 
 
@@ -129,7 +129,7 @@ public class Train
                     speed += accelerationStrength;
                 }
 
-                if (parentLine.Get_RegionIndex(currentPosition) == platform_NEXT.point_platform_START.index)
+                if (parentLine.Get_RegionIndex(currentPosition) == nextPlatform.point_platform_START.index)
                 {
                     ChangeState(TrainState.ARRIVING);
                 }
@@ -137,8 +137,8 @@ public class Train
                 break;
             case TrainState.ARRIVING:
 
-                float _platform_start = platform_NEXT.point_platform_START.distanceAlongPath;
-                float _platform_end = platform_NEXT.point_platform_END.distanceAlongPath;
+                float _platform_start = nextPlatform.point_platform_START.distanceAlongPath;
+                float _platform_end = nextPlatform.point_platform_END.distanceAlongPath;
                 float _platform_length = _platform_end - _platform_start;
                 float arrivalProgress = (parentLine.Get_proportionAsDistance(currentPosition) - _platform_start) /
                                         _platform_length;
@@ -172,9 +172,18 @@ public class Train
             case TrainState.UNLOADING:
                 // alert passengers in departing list
                 // get list of passengers that will be boarding
+                if (Timer.TimerReachedZero(ref stateDelay))
+                {
+                    ChangeState(TrainState.LOADING);
+                }
+
                 break;
             case TrainState.LOADING:
                 // when all boardees are inside
+                if (Timer.TimerReachedZero(ref stateDelay))
+                {
+                    ChangeState(TrainState.DOORS_CLOSE);
+                }
                 break;
             case TrainState.DOORS_CLOSE:
                 if (Timer.TimerReachedZero(ref stateDelay))
