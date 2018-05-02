@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using UnityEditor;
 using UnityEngine;
@@ -14,9 +15,11 @@ public class TrainCarriage : MonoBehaviour
 
     public float positionOnRail;
     public List<Commuter> passengers;
+    public List<CommuterNavPoint> seats;
     public int passengerCount;
     public TrainCarriage_door door_LEFT;
     public TrainCarriage_door door_RIGHT;
+    public GameObject[] RecolouredObjects;
 
     
     private Transform t;
@@ -25,6 +28,7 @@ public class TrainCarriage : MonoBehaviour
     private void Start()
     {
         t = transform;
+        seats = GetComponentsInChildren<CommuterNavPoint>().ToList();
 //        mat = GetComponent<Renderer>().material;
     }
 
@@ -45,5 +49,16 @@ public class TrainCarriage : MonoBehaviour
     {
         TrainCarriage_door _DOOR = (_rightSide) ? door_RIGHT : door_LEFT;
         return _DOOR.DoorsClosed();
+    }
+
+    public void SetColour(Color _lineColour)
+    {
+        foreach (GameObject _GO in RecolouredObjects)
+        {
+            foreach (Renderer _R in _GO.GetComponentsInChildren<Renderer>())
+            {
+                _R.material.color = _lineColour;
+            }
+        }
     }
 }

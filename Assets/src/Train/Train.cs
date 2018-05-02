@@ -60,6 +60,7 @@ public class Train
             GameObject _tempCarriage_OBJ = (GameObject) Metro.Instantiate(Metro.INSTANCE.prefab_trainCarriage);
             TrainCarriage _TC = _tempCarriage_OBJ.GetComponent<TrainCarriage>();
             carriages.Add(_TC);
+            _TC.SetColour(parentLine.lineColour);
         }
     }
 

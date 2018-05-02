@@ -22,7 +22,7 @@ GameObject:
   - component: {fileID: 33956767278535232}
   - component: {fileID: 23338922976761332}
   - component: {fileID: 65576205859529000}
-  - component: {fileID: 114288852653454994}
+  - component: {fileID: 114266197866798668}
   m_Layer: 0
   m_Name: Commuter
   m_TagString: Untagged
@@ -58,7 +58,7 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RenderingLayerMask: 4294967295
   m_Materials:
-  - {fileID: 2100000, guid: a5222d3a8701d41f4ae40200be45aa78, type: 2}
+  - {fileID: 2100000, guid: c57b258ea644e470386e95fb5ded90df, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -97,7 +97,7 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &114288852653454994
+--- !u!114 &114266197866798668
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -105,6 +105,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 1749007641357956}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 535f0460c9e944a8ba9cff972400b871, type: 3}
+  m_Script: {fileID: 11500000, guid: 42d37f500a2604b7d85cc41a170dd501, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  route_START: {fileID: 0}
+  route_END: {fileID: 0}

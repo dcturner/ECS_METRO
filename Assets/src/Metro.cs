@@ -18,6 +18,7 @@ public class Metro : MonoBehaviour
     // PUBLICS
     public GameObject prefab_trainCarriage;
     public GameObject prefab_platform;
+    public GameObject prefab_commuter;
     [Range(0f,1f)]
     public float Bezier_HandleReach = 0.3f;
     public float Bezier_PlatformOffset = 3f;

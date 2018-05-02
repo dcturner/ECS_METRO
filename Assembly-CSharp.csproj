@@ -69,6 +69,7 @@
     <Compile Include="Assets\src\Train\TrainCarriage.cs" />
     <Compile Include="Assets\src\Train\TrainCarriage_door.cs" />
     <Compile Include="Assets\src\Walkway.cs" />
+    <None Include="Assets\AlignAndDistribute\AlignAndDistribute_ReadMe.txt" />
     <Reference Include="UnityEditor.StandardEvents">
       <HintPath>/Users/dcturner/Documents/KerShoot/git/ECS_METRO/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>
     </Reference>

@@ -53,6 +53,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\AlignAndDistribute\Editor\AlignAndDistribute_Logic.cs" />
+    <Compile Include="Assets\AlignAndDistribute\Editor\WorkFast.cs" />
     <Compile Include="Assets\Editor\ConfigureRailMarkers.cs" />
     <Reference Include="UnityEditor.StandardEvents">
       <HintPath>/Users/dcturner/Documents/KerShoot/git/ECS_METRO/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>
