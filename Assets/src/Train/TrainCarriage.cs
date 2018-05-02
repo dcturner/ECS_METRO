@@ -35,4 +35,15 @@ public class TrainCarriage : MonoBehaviour
         t.LookAt(t.position - _newRotation);
     }
 
+    public bool Doors_OPEN(bool _rightSide = true)
+    {
+        TrainCarriage_door _DOOR = (_rightSide) ? door_RIGHT : door_LEFT;
+        return _DOOR.DoorsOpen();
+    }
+
+    public bool Doors_CLOSED(bool _rightSide = true)
+    {
+        TrainCarriage_door _DOOR = (_rightSide) ? door_RIGHT : door_LEFT;
+        return _DOOR.DoorsClosed();
+    }
 }

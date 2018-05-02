@@ -80,22 +80,28 @@ public class Train
             case TrainState.ARRIVING:
                 // slow down and then stop at the end of the platform
                 // tell commuters on platform about available carriage spaces
+                Debug.Log(trainIndex + ": ARRIVING");
                 speed_on_platform_arrival = speed;
                 break;
             case TrainState.DOORS_OPEN:
                 // slight delay, then open the required door
-                Debug.Log("ARRIVED! - doors about to open");
+                Debug.Log(trainIndex + " STOPPED - DOORS_OPENING");
                 speed = 0f;
                 stateDelay = Metro.INSTANCE.Train_delay_doors_OPEN;
                 break;
             case TrainState.UNLOADING:
                 // tell commuters they can leave
+                Debug.Log(trainIndex + ": UNLOADING");
+                stateDelay = 1f;
                 // wait until totalPassengers == (totalPassengers - passengersLeavingAtNextStop)
                 break;
             case TrainState.LOADING:
+                Debug.Log(trainIndex + ": LOADING");
                 // tell commuters on platform that they are able to board now
+                stateDelay = 1f;
                 break;
             case TrainState.DOORS_CLOSE:
+                Debug.Log(trainIndex + ": DOORS_CLOSING");
                 // once totalPassengers == (totalPassengers + (waitingToBoard - availableSpaces)) - shut the doors
                 stateDelay = Metro.INSTANCE.Train_delay_doors_CLOSE;
                 // sort out vars for next stop (nextPlatform, door side, passengers wanting to get off etc)
@@ -103,6 +109,7 @@ public class Train
             case TrainState.DEPARTING:
                 // slight delay
                 // Determine next platform / station we'll be stopping at
+                Debug.Log(trainIndex + ": DEPARTING");
                 Update_NextPlatform();
                 // get list of passengers who wish to depart at the next stop
                 stateDelay = Metro.INSTANCE.Train_delay_departure;
@@ -138,7 +145,7 @@ public class Train
                 arrivalProgress = 1f - Mathf.Cos(arrivalProgress * Mathf.PI * 0.5f);
                 speed = speed_on_platform_arrival * (1f - arrivalProgress);
 
-                if (arrivalProgress >= 0.99f)
+                if (arrivalProgress >= Metro.PLATFORM_ARRIVAL_THRESHOLD)
                 {
                     ChangeState(TrainState.DOORS_OPEN);
                 }
@@ -148,8 +155,19 @@ public class Train
 
                 if (Timer.TimerReachedZero(ref stateDelay))
                 {
+                    bool allReady = true;
+                    foreach (TrainCarriage _CARRIAGE in carriages)
+                    {
+                        if (!_CARRIAGE.Doors_OPEN())
+                        {
+                            allReady = false;
+                        }
+                    }
+                    if (allReady)
+                    {
+                        ChangeState(TrainState.UNLOADING);
+                    }
                 }
-
                 break;
             case TrainState.UNLOADING:
                 // alert passengers in departing list
@@ -161,8 +179,19 @@ public class Train
             case TrainState.DOORS_CLOSE:
                 if (Timer.TimerReachedZero(ref stateDelay))
                 {
+                    bool allReady = true;
+                    foreach (TrainCarriage _CARRIAGE in carriages)
+                    {
+                        if (!_CARRIAGE.Doors_CLOSED())
+                        {
+                            allReady = false;
+                        }
+                    }
+                    if (allReady)
+                    {
+                        ChangeState(TrainState.DEPARTING);
+                    }
                 }
-
                 break;
             case TrainState.DEPARTING:
                 // slight delay
@@ -217,6 +246,7 @@ public class Train
                     break;
                 }
             }
+
             _current.UpdateCarriage(carriageRailPosition, _current_POS,
                 parentLine.Get_RotationOnRail(carriageRailPosition));
         }

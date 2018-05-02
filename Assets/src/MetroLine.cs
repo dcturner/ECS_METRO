@@ -121,7 +121,7 @@ public class MetroLine  {
                 int opposite_START = totalPoints - (i+1);
                 int opposite_END = totalPoints - i;
                 Platform _opposirePlatform = AddPlatform(opposite_START, opposite_END);
-//                _opposirePlatform.transform.eulerAngles = _ouboundPlatform.transform.rotation.eulerAngles + new Vector3(0f, 180f, 0f);;
+                _opposirePlatform.transform.eulerAngles = _ouboundPlatform.transform.rotation.eulerAngles + new Vector3(0f, 180f, 0f);;
                 Debug.Log("-- added outbound platform: start: " +_plat_START+", end:"+_plat_END);
                 Debug.Log("opposite platform: start: " +opposite_START+", end:"+opposite_END);
             }

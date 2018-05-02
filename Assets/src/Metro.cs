@@ -10,6 +10,7 @@ public class Metro : MonoBehaviour
     public static float BEZIER_HANDLE_REACH = 0.1f;
     public static float BEZIER_PLATFORM_OFFSET = 3f;
     public const int BEZIER_MEASUREMENT_SUBDIVISIONS = 2;
+    public const float PLATFORM_ARRIVAL_THRESHOLD = 0.975f;
     public static Metro INSTANCE;
     
     
