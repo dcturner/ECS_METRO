@@ -44,6 +44,8 @@ public class Metro : MonoBehaviour
     [HideInInspector]
     public MetroLine[] metroLines;
 
+    [HideInInspector] public List<Commuter> commuters;
+
     public static string GetLine_NAME_FromIndex(int _index)
     {
         string result = "";
@@ -77,6 +79,7 @@ public class Metro : MonoBehaviour
     private void Awake()
     {
         INSTANCE = this;
+        commuters = new List<Commuter>();
     }
 
     private void Start()
@@ -161,6 +164,25 @@ public class Metro : MonoBehaviour
         }
     }
 
+    #region -------------------------------------- << Commuters
+
+    [ContextMenu("ADD COMMUTER")]
+    public void AddCommuter()
+    {
+        Platform _P = metroLines[0].platforms[0];
+        commuters.Add(_P.AddCommuter(_P.stairs_FRONT_CROSS, null));
+    }
+
+    public void UpdateCommuters()
+    {
+        for (int i = 0; i < commuters.Count; i++)
+        {
+            commuters[i].UpdateCommuter();
+        }
+    }
+
+    #endregion -------------------------------------- Commuters >>
+    
     #region ------------------------- < GIZMOS
 
     private void OnDrawGizmos()

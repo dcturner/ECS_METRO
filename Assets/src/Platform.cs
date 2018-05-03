@@ -40,9 +40,13 @@ public class Platform : MonoBehaviour
         Colour.RecolourChildren(stairs_DOWN.transform, _LINE_COLOUR);
     }
 
-    public void AddCommuter(Walkway _journeyStart, Walkway _journeyEnd)
+    public Commuter AddCommuter(Walkway _journeyStart, Walkway _journeyEnd)
     {
-        GameObject commuter_OBJ =(GameObject) Instantiate(Metro.INSTANCE.prefab_commuter, transform.position, transform.rotation);
+        Vector3 walkwayTop = _journeyStart.nav_TOP.transform.position;
+        GameObject commuter_OBJ =(GameObject) Instantiate(Metro.INSTANCE.prefab_commuter, walkwayTop, transform.rotation);
+        Commuter _C = commuter_OBJ.GetComponent<Commuter>();
+        _C.Init(this, _journeyStart);
+        return _C;
     }
 
     public int Get_QueueLength(int _queueIndex)
