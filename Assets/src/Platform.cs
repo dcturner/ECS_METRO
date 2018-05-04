@@ -31,6 +31,11 @@ public class Platform : MonoBehaviour
         }
     }
 
+    public void Setup_Walkways()
+    {
+        
+    }
+
     public void SetColour()
     {
         Color _LINE_COLOUR = parentMetroLine.lineColour;

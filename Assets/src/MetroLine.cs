@@ -59,7 +59,7 @@ public class MetroLine  {
         // - - - - - - - - - - - - - - - - - - - - - - - -  OUTBOUND points
         for (int i = 0; i < total_outboundPoints; i++)
         {
-            BezierPoint _currentPoint = bezierPath.AddPoint(_outboundPoints[i].transform.position);
+            bezierPath.AddPoint(_outboundPoints[i].transform.position);
         }
         // fix the OUTBOUND handles
         for (int i = 0; i <= total_outboundPoints-1; i++)

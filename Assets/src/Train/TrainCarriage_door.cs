@@ -22,22 +22,20 @@ public class TrainCarriage_door : MonoBehaviour
     public bool DoorsOpen()
     {
         Vector3 _DOOR_POS = door_LEFT.localPosition;
-        bool arrived = Approach.Apply(ref _DOOR_POS.x, ref door_SPEED, left_OPEN_X, DOOR_ACCELERATION, DOOR_ACCELERATION,
-            DOOR_ARRIVAL_THRESHOLD);
+        bool arrived = Approach.Apply(ref _DOOR_POS.x, ref door_SPEED, left_OPEN_X, DOOR_ACCELERATION,
+            DOOR_ARRIVAL_THRESHOLD, DOOR_FRICTION);
         door_LEFT.localPosition = _DOOR_POS;
         door_RIGHT.localPosition = new Vector3(-_DOOR_POS.x, _DOOR_POS.y, _DOOR_POS.z);
-        Friction.Apply(ref door_SPEED, DOOR_FRICTION);
         return arrived;
     }
 
     public bool DoorsClosed()
     {
         Vector3 _DOOR_POS = door_LEFT.localPosition;
-        bool arrived = Approach.Apply(ref _DOOR_POS.x, ref door_SPEED, left_CLOSED_X, DOOR_ACCELERATION, DOOR_ACCELERATION,
-            DOOR_ARRIVAL_THRESHOLD);
+        bool arrived = Approach.Apply(ref _DOOR_POS.x, ref door_SPEED, left_CLOSED_X, DOOR_ACCELERATION,
+            DOOR_ARRIVAL_THRESHOLD, DOOR_FRICTION);
         door_LEFT.localPosition = _DOOR_POS;
         door_RIGHT.localPosition = new Vector3(-_DOOR_POS.x, _DOOR_POS.y, _DOOR_POS.z);
-        Friction.Apply(ref door_SPEED, DOOR_FRICTION);
         return arrived;
     }
 }

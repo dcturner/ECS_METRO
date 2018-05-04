@@ -30,7 +30,6 @@ public class BezierPath
 
     void SetHandles(BezierPoint _point, Vector3 _prevPointLocation)
     {
-        Vector3 _pointLocation = _point.location;
         Vector3 _dist_PREV_CURRENT = Vector3.Normalize(_point.location - _prevPointLocation);
 
         _point.SetHandles(_dist_PREV_CURRENT);     

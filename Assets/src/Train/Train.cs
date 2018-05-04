@@ -81,39 +81,33 @@ public class Train
             case TrainState.ARRIVING:
                 // slow down and then stop at the end of the platform
                 // tell commuters on platform about available carriage spaces
-                Debug.Log(trainIndex + ": ARRIVING");
                 speed_on_platform_arrival = speed;
                 break;
             case TrainState.DOORS_OPEN:
                 // slight delay, then open the required door
-                Debug.Log(trainIndex + " STOPPED - DOORS_OPENING");
                 speed = 0f;
                 stateDelay = Metro.INSTANCE.Train_delay_doors_OPEN;
                 break;
             case TrainState.UNLOADING:
                 // tell commuters they can leave
-                Debug.Log(trainIndex + ": UNLOADING");
                 stateDelay = 1f;
                 // wait until totalPassengers == (totalPassengers - passengersLeavingAtNextStop)
                 break;
             case TrainState.LOADING:
-                Debug.Log(trainIndex + ": LOADING");
                 // tell commuters on platform that they are able to board now
                 stateDelay = 1f;
                 break;
             case TrainState.DOORS_CLOSE:
-                Debug.Log(trainIndex + ": DOORS_CLOSING");
                 // once totalPassengers == (totalPassengers + (waitingToBoard - availableSpaces)) - shut the doors
                 stateDelay = Metro.INSTANCE.Train_delay_doors_CLOSE;
                 // sort out vars for next stop (nextPlatform, door side, passengers wanting to get off etc)
                 break;
             case TrainState.DEPARTING:
-                // slight delay
                 // Determine next platform / station we'll be stopping at
-                Debug.Log(trainIndex + ": DEPARTING");
                 Update_NextPlatform();
-                // get list of passengers who wish to depart at the next stop
+                // slight delay
                 stateDelay = Metro.INSTANCE.Train_delay_departure;
+                // get list of passengers who wish to depart at the next stop
                 break;
             case TrainState.EMERGENCY_STOP:
                 break;
@@ -225,7 +219,6 @@ public class Train
 
     void UpdateCarriages()
     {
-        float carriageLength_asRailDistance = parentLine.Get_distanceAsRailProportion(TrainCarriage.CARRIAGE_LENGTH);
         float _REAL_CARRIAGE_LENGTH = TrainCarriage.CARRIAGE_LENGTH + TrainCarriage.CARRIAGE_SPACING;
         carriages[0].UpdateCarriage(currentPosition, parentLine.Get_PositionOnRail(currentPosition),
             parentLine.Get_RotationOnRail(currentPosition));

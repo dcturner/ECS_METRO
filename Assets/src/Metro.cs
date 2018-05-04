@@ -12,28 +12,26 @@ public class Metro : MonoBehaviour
     public const int BEZIER_MEASUREMENT_SUBDIVISIONS = 2;
     public const float PLATFORM_ARRIVAL_THRESHOLD = 0.975f;
     public static Metro INSTANCE;
-    
-    
-    
+
+
     // PUBLICS
     public GameObject prefab_trainCarriage;
     public GameObject prefab_platform;
     public GameObject prefab_commuter;
-    [Range(0f,1f)]
-    public float Bezier_HandleReach = 0.3f;
+    [Range(0f, 1f)] public float Bezier_HandleReach = 0.3f;
     public float Bezier_PlatformOffset = 3f;
-    [Header("Trains")]
-    public float Train_accelerationStrength = 0.001f;
+    [Header("Trains")] public float Train_accelerationStrength = 0.001f;
     public float Train_brakeStrength = 0.01f;
     public float Train_railFriction = 0.99f;
     public float Train_delay_doors_OPEN = 2f;
     public float Train_delay_doors_CLOSE = 1f;
     public float Train_delay_departure = 1f;
+
     [Header("Commuters")]
     // walk speed etc
-    
     [Header("MetroLines")]
     public string[] LineNames;
+
     public int[] maxTrains;
     public int[] carriagesPerTrain;
     public float[] trainCarriageSpacing;
@@ -41,8 +39,7 @@ public class Metro : MonoBehaviour
     private int totalLines = 0;
     public Color[] LineColours;
 
-    [HideInInspector]
-    public MetroLine[] metroLines;
+    [HideInInspector] public MetroLine[] metroLines;
 
     [HideInInspector] public List<Commuter> commuters;
 
@@ -88,17 +85,13 @@ public class Metro : MonoBehaviour
         BEZIER_PLATFORM_OFFSET = Bezier_PlatformOffset;
         SetupMetroLines();
         SetupTrains();
+        SetupCommuters();
     }
 
     private void Update()
     {
-        for (int i = 0; i < totalLines; i++)
-        {
-            if (metroLines[i] != null)
-            {
-                metroLines[i].UpdateTrains();
-            }
-        }
+        Update_MetroLines();
+        Update_Commuters();
     }
 
     void SetupMetroLines()
@@ -114,23 +107,32 @@ public class Metro : MonoBehaviour
             // Only continue if we have something to work with
             if (_relevantMarkers.Count > 1)
             {
-                int[] _platformPointIndexes =
-                    _relevantMarkers.Where(m => m.railMarkerType == RailMarkerType.PLATFORM_START).Select(m => m.pointIndex).ToArray();
-
-
                 MetroLine _newLine = new MetroLine(i, maxTrains[i]);
                 _newLine.Create_RailPath(_relevantMarkers);
                 metroLines[i] = _newLine;
             }
             else
             {
-                Debug.LogWarning("Insufficient RailMarkers found for line: " + i +", you need to add the outbound points");
+                Debug.LogWarning("Insufficient RailMarkers found for line: " + i +
+                                 ", you need to add the outbound points");
             }
         }
+
         // now destroy all RailMarkers
         foreach (RailMarker _RM in FindObjectsOfType<RailMarker>())
         {
             Destroy(_RM);
+        }
+    }
+
+    void Update_MetroLines()
+    {
+        for (int i = 0; i < totalLines; i++)
+        {
+            if (metroLines[i] != null)
+            {
+                metroLines[i].UpdateTrains();
+            }
         }
     }
 
@@ -149,6 +151,7 @@ public class Metro : MonoBehaviour
                 }
             }
         }
+
         // now tell each train who is ahead of them
         for (int i = 0; i < totalLines; i++)
         {
@@ -166,6 +169,11 @@ public class Metro : MonoBehaviour
 
     #region -------------------------------------- << Commuters
 
+    public void SetupCommuters()
+    {
+        AddCommuter();
+    }
+
     [ContextMenu("ADD COMMUTER")]
     public void AddCommuter()
     {
@@ -173,7 +181,7 @@ public class Metro : MonoBehaviour
         commuters.Add(_P.AddCommuter(_P.stairs_FRONT_CROSS, null));
     }
 
-    public void UpdateCommuters()
+    public void Update_Commuters()
     {
         for (int i = 0; i < commuters.Count; i++)
         {
@@ -182,7 +190,7 @@ public class Metro : MonoBehaviour
     }
 
     #endregion -------------------------------------- Commuters >>
-    
+
     #region ------------------------- < GIZMOS
 
     private void OnDrawGizmos()
@@ -215,10 +223,7 @@ public class Metro : MonoBehaviour
                 }
             }
         }
-        
-        
     }
 
     #endregion ------------------------ GIZMOS >
-
 }

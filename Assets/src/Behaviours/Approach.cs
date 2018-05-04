@@ -5,8 +5,9 @@ using UnityEngine.Analytics;
 
 public class Approach {
 
-	public static bool Apply(ref float _current, ref float _speed, float _target, float _acceleration, float _brake, float _arrivalThreshold)
+	public static bool Apply(ref float _current, ref float _speed, float _target, float _acceleration, float _arrivalThreshold, float _friction)
 	{
+		_speed *= _friction;
 		if (_current < (_target - _arrivalThreshold))
 		{
 			_speed += _acceleration;
@@ -14,7 +15,7 @@ public class Approach {
 			return false;
 		}else if (_current > (_target + _arrivalThreshold))
 		{
-			_speed -= _brake;
+			_speed -= _acceleration;
 			_current += _speed;
 			return false;
 		}
@@ -24,12 +25,16 @@ public class Approach {
 		}
 	}
 
-	public static bool Apply(ref Vector3 _current, ref Vector3 _speed, Vector3 _target, Vector3 _acceleration,
-		Vector3 _brake, Vector3 _arrivalThreshold)
+	public static bool Apply(ref Transform _transform, ref Vector3 _speed, Vector3 _destination, float _acceleration,
+		float _arrivalThreshold, float _friction)
 	{
-		bool arrivedX = Approach.Apply(ref _current.x, ref _speed.x, _target.x, _acceleration.x, _brake.x, _arrivalThreshold.x);
-		bool arrivedY = Approach.Apply(ref _current.y, ref _speed.y, _target.y, _acceleration.y, _brake.y, _arrivalThreshold.y);
-		bool arrivedZ = Approach.Apply(ref _current.z, ref _speed.z, _target.z, _acceleration.z, _brake.z, _arrivalThreshold.z);
+		Vector3 _POS = _transform.position;
+		
+		bool arrivedX = Approach.Apply(ref _POS.x, ref _speed.x, _destination.x, _acceleration, _arrivalThreshold, _friction);
+		bool arrivedY = Approach.Apply(ref _POS.y, ref _speed.y, _destination.y, _acceleration, _arrivalThreshold, _friction);
+		bool arrivedZ = Approach.Apply(ref _POS.z, ref _speed.z, _destination.z, _acceleration, _arrivalThreshold, _friction);
+
+		_transform.position = _POS;
 		
 		return (arrivedX && arrivedY && arrivedZ);
 	}

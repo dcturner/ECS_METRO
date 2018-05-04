@@ -15,7 +15,8 @@ public class TrainCarriage : MonoBehaviour
 
     public float positionOnRail;
     public List<Commuter> passengers;
-    public List<CommuterNavPoint> seats;
+    public List<CommuterNavPoint> seats_FREE;
+    public List<CommuterNavPoint> seats_TAKEN;
     public int passengerCount;
     public TrainCarriage_door door_LEFT;
     public TrainCarriage_door door_RIGHT;
@@ -28,8 +29,8 @@ public class TrainCarriage : MonoBehaviour
     private void Start()
     {
         t = transform;
-        seats = GetComponentsInChildren<CommuterNavPoint>().ToList();
-//        mat = GetComponent<Renderer>().material;
+        seats_FREE = GetComponentsInChildren<CommuterNavPoint>().ToList();
+        seats_TAKEN = new List<CommuterNavPoint>();
     }
 
     public void UpdateCarriage(float _newPositionOnRail, Vector3 _newPos, Vector3 _newRotation)

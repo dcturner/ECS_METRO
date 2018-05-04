@@ -19,7 +19,6 @@
           <e p="Behaviours" t="Include">
             <e p="Approach.cs" t="Include" />
             <e p="Colour.cs" t="Include" />
-            <e p="Friction.cs" t="Include" />
             <e p="Timer.cs" t="Include" />
           </e>
           <e p="Bezier.cs" t="Include" />
@@ -48,6 +47,6 @@
         <e p="bin" t="ExcludeRecursive" />
       </e>
     </e>
-    <e p="$USER_HOME$/Library/Caches/Rider2018.1/resharper-host/local/Transient/ReSharperHost/v12/SolutionCaches/_ECS_METRO.217181741.00" t="ExcludeRecursive" />
+    <e p="$USER_HOME$/Library/Caches/Rider2018.1/resharper-host/local/Transient/ReSharperHost/v12/SolutionCaches/_ECS_METRO.2026909867.00" t="ExcludeRecursive" />
   </component>
 </project>
