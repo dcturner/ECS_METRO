@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using UnityEngine;
 
 
@@ -21,7 +22,8 @@ public class Train
     public List<TrainCarriage> carriages;
     public int totalCarriages;
     public List<Commuter> passengers;
-    public List<Commuter> disembarkingAtNextPlatform;
+    public List<Commuter> passengers_to_DISEMBARK;
+    public List<Commuter> passengers_to_EMBARK;
     public int passengerCountOnDeparture;
     private float currentPosition = 0f;
     private int currentRegion;
@@ -35,6 +37,7 @@ public class Train
     public MetroLine parentLine;
     public Platform nextPlatform;
     public Train trainAheadOfMe;
+    public bool trainReadyToDepart = false;
 
     public Train(int _trainIndex, int _parentLineIndex, float _startPosition, int _totalCarriages)
     {
@@ -46,7 +49,8 @@ public class Train
         totalCarriages = _totalCarriages;
         SetupCarriages();
         passengers = new List<Commuter>();
-        disembarkingAtNextPlatform = new List<Commuter>();
+        passengers_to_DISEMBARK = new List<Commuter>();
+        passengers_to_EMBARK = new List<Commuter>();
         speed = 0f;
         accelerationStrength = Metro.INSTANCE.Train_accelerationStrength * parentLine.speedRatio;
         brakeStrength = Metro.INSTANCE.Train_brakeStrength;
@@ -69,7 +73,7 @@ public class Train
     void Update_NextPlatform()
     {
         nextPlatform = parentLine.Get_NextPlatform(currentPosition, nextPlatform);
-        disembarkingAtNextPlatform.Clear();
+        passengers_to_DISEMBARK.Clear();
     }
 
 
@@ -82,6 +86,7 @@ public class Train
                 // keep current speed
                 break;
             case TrainState.ARRIVING:
+                PrepareForArrival();
                 speed_on_platform_arrival = speed;
                 break;
             case TrainState.DOORS_OPEN:
@@ -90,12 +95,11 @@ public class Train
                 stateDelay = Metro.INSTANCE.Train_delay_doors_OPEN;
                 break;
             case TrainState.UNLOADING:
-                PreparePassengersForPlatform();
                 AllowPassengersToLeave();
                 // wait until totalPassengers == (totalPassengers - passengersLeavingAtNextStop)
                 break;
             case TrainState.LOADING:
-                nextPlatform.AllowQueuesReadyToBoard(this);
+                nextPlatform.AllowQueuesToBoard(this);
                 break;
             case TrainState.DOORS_CLOSE:
                 // once totalPassengers == (totalPassengers + (waitingToBoard - availableSpaces)) - shut the doors
@@ -165,13 +169,21 @@ public class Train
                 }
                 break;
             case TrainState.UNLOADING:
-                if (disembarkingAtNextPlatform.Count == 0)
+                if (passengers_to_DISEMBARK.Count == 0)
                 {
                     ChangeState(TrainState.LOADING);
                 }
 
                 break;
             case TrainState.LOADING:
+                if (Timer.TimerReachedZero(ref stateDelay))
+                {
+                    if (passengers_to_DISEMBARK.Count == 0 && passengers_to_EMBARK.Count == 0)
+                    {
+                        ChangeState(TrainState.DOORS_CLOSE);
+                    }
+                }
+
                 break;
             case TrainState.DOORS_CLOSE:
                 if (Timer.TimerReachedZero(ref stateDelay))
@@ -248,44 +260,47 @@ public class Train
         }
     }
 
-    void PreparePassengersForPlatform()
+    void PrepareForArrival()
     {
-        Debug.Log("Next platform: " + nextPlatform.point_platform_END.index);
+        passengers_to_DISEMBARK.Clear();
+        passengers_to_EMBARK.Clear();
         for (int i = 0; i < totalCarriages; i++)
         {
             TrainCarriage _CARRIAGE = carriages[i];
             foreach (Commuter _PASSENGER in _CARRIAGE.passengers)
             {
-                
-        Debug.Log("passenger desired stop: " + _PASSENGER.targetPlatform.point_platform_END.index);
                 if (_PASSENGER.targetPlatform == nextPlatform)
                 {
-                    disembarkingAtNextPlatform.Add(_PASSENGER);
+                    passengers_to_DISEMBARK.Add(_PASSENGER);
+                    _CARRIAGE.seats_TAKEN.Remove(_PASSENGER.currentSeat);
+                    _CARRIAGE.seats_FREE.Add(_PASSENGER.currentSeat);
+                    _PASSENGER.currentSeat = null;
+                }
+            }
+
+            if(nextPlatform.platformQueues[i].Count >0){
+            Commuter[] carriageQueue = nextPlatform.platformQueues[i].ToArray();
+
+                for (int queueIndex = 0; queueIndex < carriageQueue.Length; queueIndex++)
+                {
+                    Commuter _COMMUTER = carriageQueue[queueIndex];
+                    if (_CARRIAGE.seats_FREE.Count > 0)
+                    {
+                        _COMMUTER.currentSeat = _CARRIAGE.AssignSeat();
+                        passengers_to_EMBARK.Add(_COMMUTER);
+                    }
+                    else
+                    {
+                        _COMMUTER.currentSeat = null;
+                    }
                 }
             }
         }
-        
-        // find out how many wish to board at the next stop
-        int waitingQueueSize = 0;
-        int freeSeats = 0;
-        for (int i = 0; i < totalCarriages; i++)
-        {
-            waitingQueueSize += nextPlatform.platformQueues[i].Count;
-            freeSeats += carriages[i].seats_FREE.Count;
-        }
-
-        int totalBoardees = (int) Mathf.Min(waitingQueueSize, freeSeats);
-        passengerCountOnDeparture = (passengers.Count - disembarkingAtNextPlatform.Count) + totalBoardees;
-        
-        Debug.Log("Passengers before arrival: " + passengers.Count);
-        Debug.Log("Leaving at next stop: " + disembarkingAtNextPlatform.Count);
-        Debug.Log("Total boardees: " + totalBoardees);
-        Debug.Log("Departure passenger count: " + passengerCountOnDeparture);
     }
 
     void AllowPassengersToLeave()
     {
-        foreach (Commuter _COMMUTER in disembarkingAtNextPlatform)
+        foreach (Commuter _COMMUTER in passengers_to_DISEMBARK)
         {
             _COMMUTER.LeaveTrain();
         }
@@ -296,18 +311,15 @@ public class Train
         passengers.Add(_commuter);
         TrainCarriage _CARRIAGE = carriages[_carriageIndex];
         _CARRIAGE.passengers.Add(_commuter);
+        passengers_to_EMBARK.Remove(_commuter);
         _commuter.transform.SetParent(_CARRIAGE.transform);
-
-        if (passengers.Count == passengerCountOnDeparture)
-        {
-            ChangeState(TrainState.DOORS_CLOSE);
-        }
     }
     public void Commuter_DISEMBARK(Commuter _commuter, int _carriageIndex)
     {
         passengers.Remove(_commuter);
-        carriages[_carriageIndex].passengers.Remove(_commuter);
-        disembarkingAtNextPlatform.Remove(_commuter);
+        TrainCarriage _CARRIAGE = carriages[_carriageIndex];
+        _CARRIAGE.passengers.Remove(_commuter);
+        passengers_to_DISEMBARK.Remove(_commuter);
         _commuter.transform.SetParent(Metro.INSTANCE.transform);
     }
 }

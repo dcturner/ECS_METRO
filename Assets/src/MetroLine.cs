@@ -19,7 +19,6 @@ public class MetroLine  {
     public float maxTrainSpeed;
     public Vector3[] railPath;
     public int carriagesPerTrain;
-    public float trainCarriageSpacing = 0.1f;
     public float train_accelerationStrength = 0.0003f;
     public float train_brakeStrength = 0.01f;
     public float train_friction = 0.95f;
@@ -44,8 +43,6 @@ public class MetroLine  {
         {
             carriagesPerTrain = 1;
         }
-
-        trainCarriageSpacing = m.trainCarriageSpacing[metroLine_index];
         maxTrainSpeed = m.maxTrainSpeed[metroLine_index];
     }
 
@@ -120,10 +117,12 @@ public class MetroLine  {
                 // now add an opposite platform!
                 int opposite_START = totalPoints - (i+1);
                 int opposite_END = totalPoints - i;
-                Platform _opposirePlatform = AddPlatform(opposite_START, opposite_END);
-                _opposirePlatform.transform.eulerAngles = _ouboundPlatform.transform.rotation.eulerAngles + new Vector3(0f, 180f, 0f);;
-                Debug.Log("-- added outbound platform: start: " +_plat_START+", end:"+_plat_END);
-                Debug.Log("opposite platform: start: " +opposite_START+", end:"+opposite_END);
+                Platform _oppositePlatform = AddPlatform(opposite_START, opposite_END);
+                _oppositePlatform.transform.eulerAngles = _ouboundPlatform.transform.rotation.eulerAngles + new Vector3(0f, 180f, 0f);;
+                
+                // pair these platforms as opposites
+                _ouboundPlatform.PairWithOppositePlatform(_oppositePlatform);
+                _oppositePlatform.PairWithOppositePlatform(_ouboundPlatform);
             }
         }
 
@@ -149,7 +148,7 @@ public class MetroLine  {
 
     public void UpdateTrains()
     {
-        float _carriageSpacing = Get_distanceAsRailProportion(trainCarriageSpacing);
+        float _carriageSpacing = Get_distanceAsRailProportion(TrainCarriage.CARRIAGE_SPACING);
         foreach (Train _t in trains)
         {
             _t.Update(_carriageSpacing);

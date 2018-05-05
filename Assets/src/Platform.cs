@@ -7,10 +7,11 @@ public class Platform : MonoBehaviour
     public int carriageCount;
     public MetroLine parentMetroLine;
     public List<Walkway> walkways;
-    public Walkway stairs_FRONT_CROSS, stairs_BACK_CROSS, stairs_UP, stairs_DOWN;
+    public Walkway walkway_FRONT_CROSS, walkway_BACK_CROSS, walkway_UP, walkway_DOWN;
     public BezierPoint point_platform_START, point_platform_END;
+    public Platform oppositePlatform;
     public Queue<Commuter>[] platformQueues;
-    public Vector3[] queuePoints;
+    public CommuterNavPoint[] queuePoints;
     public Train currentTrainAtPlatform;
 
     public void SetupPlatform(MetroLine _parentMetroLine, BezierPoint _start, BezierPoint _end)
@@ -23,59 +24,89 @@ public class Platform : MonoBehaviour
         
         // setup queue lists and spacing
         platformQueues = new Queue<Commuter>[carriageCount];
-        queuePoints = new Vector3[carriageCount];
-        Vector3 frontQueuePoint = transform.position + new Vector3(0f,0f,2f);
         for (int i = 0; i < carriageCount; i++)
         {
             platformQueues[i] = new Queue<Commuter>();
-            queuePoints[i] = frontQueuePoint + (i * new Vector3(TrainCarriage.CARRIAGE_LENGTH, 0f, 0f));
         }
+        Setup_Walkways();
     }
 
     public void Setup_Walkways()
     {
-        
+        foreach (Walkway _WALKWAY in GetComponentsInChildren<Walkway>())
+        {
+            _WALKWAY.connects_FROM = this;
+        }
+    }
+    
+    public void PairWithOppositePlatform(Platform _oppositePlatform)
+    {
+        oppositePlatform = _oppositePlatform;
+        walkway_FRONT_CROSS.connects_TO = oppositePlatform;
+        walkway_BACK_CROSS.connects_TO = oppositePlatform;
     }
 
     public void SetColour()
     {
         Color _LINE_COLOUR = parentMetroLine.lineColour;
-        Colour.RecolourChildren(stairs_FRONT_CROSS.transform, _LINE_COLOUR);
-        Colour.RecolourChildren(stairs_BACK_CROSS.transform, _LINE_COLOUR);
-        Colour.RecolourChildren(stairs_UP.transform, _LINE_COLOUR);
-        Colour.RecolourChildren(stairs_DOWN.transform, _LINE_COLOUR);
+        Colour.RecolourChildren(walkway_FRONT_CROSS.transform, _LINE_COLOUR);
+        Colour.RecolourChildren(walkway_BACK_CROSS.transform, _LINE_COLOUR);
+        Colour.RecolourChildren(walkway_UP.transform, _LINE_COLOUR);
+        Colour.RecolourChildren(walkway_DOWN.transform, _LINE_COLOUR);
     }
 
-    public Commuter AddCommuter(Walkway _journeyStart, Walkway _journeyEnd)
-    {
-        Vector3 walkwayTop = _journeyStart.nav_END.transform.position;
-        GameObject commuter_OBJ =(GameObject) Instantiate(Metro.INSTANCE.prefab_commuter, walkwayTop, transform.rotation);
-        Commuter _C = commuter_OBJ.GetComponent<Commuter>();
-        _C.Init(this, _journeyStart);
-        return _C;
-    }
-
-    public int Get_QueueLength(int _queueIndex)
-    {
-        return platformQueues[_queueIndex].Count;
-    }
-
-    public Vector3 Get_QueuePosition(int _queueIndex)
-    {
-        return queuePoints[_queueIndex];
-    }
-
-    public void AllowQueuesReadyToBoard(Train _train)
+    public void AllowQueuesToBoard(Train _train)
     {
         currentTrainAtPlatform = _train;
         for (int i = 0; i < carriageCount; i++)
         {
             foreach (Commuter _COMMUTER in platformQueues[i])
             {
-                
-                _COMMUTER.BoardTrain(_train, _train.carriages[i].door_RIGHT, _train.carriages[i].AssignSeat());
+                if (_COMMUTER.currentSeat != null)
+                {
+                    _COMMUTER.BoardTrain(_train, _train.carriages[i].door_RIGHT, _train.carriages[i].AssignSeat());
+                }
             }
         }
+    }
+
+    public int Get_NumberOfStopsTo(Platform _destination)
+    {
+        int count = 9999;
+        int startAt = point_platform_END.index;
+        BezierPath _PATH = parentMetroLine.bezierPath;
+        int totalPointsOnLine = _PATH.points.Count;
+
+        for (int i = 1; i < totalPointsOnLine; i++)
+        {
+            int _TEST_INDEX = (startAt + i) % totalPointsOnLine;
+            count = i;
+            foreach (Platform _PLATFORM in parentMetroLine.platforms)
+            {
+                if (_PLATFORM.point_platform_END.index == _TEST_INDEX)
+                {
+                    if (_PLATFORM.HasWalkwayTo(_destination) != null || _PLATFORM.oppositePlatform == _destination)
+                    {
+                        return count;
+                    }
+                }
+            }
+        }
+
+        return count;
+    }
+
+    public Walkway HasWalkwayTo(Platform _platform)
+    {
+        foreach (Walkway _WALKWAY in walkways)
+        {
+            if (_WALKWAY.connects_TO == _platform)
+            {
+                return _WALKWAY;
+            }
+        }
+
+        return null;
     }
 
     public int Get_ShortestQueue()
@@ -91,8 +122,6 @@ public class Platform : MonoBehaviour
                 shortest = i;
             }
         }
-
-        Debug.Log("shortest queue: " + shortest + ", length: " + queueLength);
         
         if (queueLength == 0)
         {

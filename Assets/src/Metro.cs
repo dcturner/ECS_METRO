@@ -34,7 +34,6 @@ public class Metro : MonoBehaviour
 
     public int[] maxTrains;
     public int[] carriagesPerTrain;
-    public float[] trainCarriageSpacing;
     public float[] maxTrainSpeed;
     private int totalLines = 0;
     public Color[] LineColours;
@@ -171,23 +170,37 @@ public class Metro : MonoBehaviour
 
     public void SetupCommuters()
     {
-        AddCommuter();
+        for (int i = 0; i < 1; i++)
+        {
+            Platform _startPlatform = GetRandomPlatform();
+            Platform _endPlatform = GetRandomPlatform();
+            while (_endPlatform == _startPlatform)
+            {
+                _endPlatform = GetRandomPlatform();
+            }
+            
+            AddCommuter(_startPlatform, _endPlatform);
+        }
+    }
+
+    Platform GetRandomPlatform()
+    {
+        int _LINE_INDEX = 0;
+        MetroLine _LINE = metroLines[_LINE_INDEX];
+        int _PLATFORM_INDEX = Mathf.FloorToInt(Random.Range(0f, (float)_LINE.platforms.Count));
+        return _LINE.platforms[_PLATFORM_INDEX];
     }
 
     [ContextMenu("ADD COMMUTER")]
-    public void AddCommuter()
+    public void AddCommuter(Platform _start, Platform _end)
     {
-        Platform _P = metroLines[0].platforms[0];
-        commuters.Add(_P.AddCommuter(_P.stairs_FRONT_CROSS, null));
-        commuters.Add(_P.AddCommuter(_P.stairs_BACK_CROSS, null));
-        commuters.Add(_P.AddCommuter(_P.stairs_UP, null));
-        commuters.Add(_P.AddCommuter(_P.stairs_FRONT_CROSS, null));
-        commuters.Add(_P.AddCommuter(_P.stairs_BACK_CROSS, null));
-        commuters.Add(_P.AddCommuter(_P.stairs_UP, null));
-        commuters.Add(_P.AddCommuter(_P.stairs_FRONT_CROSS, null));
-        commuters.Add(_P.AddCommuter(_P.stairs_BACK_CROSS, null));
-        commuters.Add(_P.AddCommuter(_P.stairs_UP, null));
+        GameObject commuter_OBJ =
+            (GameObject) Instantiate(Metro.INSTANCE.prefab_commuter, _start.transform.position + new Vector3(0f,0f,0f), transform.rotation);
+        Commuter _C = commuter_OBJ.GetComponent<Commuter>();
+        _C.Init(_start, _end);
+        commuters.Add(_C);
     }
+
 
     public void Remove_Commuter(Commuter _commuter)
     {
