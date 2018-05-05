@@ -397,7 +397,7 @@ GameObject:
   - component: {fileID: 4375826259545952}
   - component: {fileID: 114155311708434914}
   m_Layer: 0
-  m_Name: nav_BOTTOM
+  m_Name: nav_START
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -769,7 +769,7 @@ GameObject:
   - component: {fileID: 4483249590775234}
   - component: {fileID: 114714827365311454}
   m_Layer: 0
-  m_Name: nav_TOP
+  m_Name: nav_END
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -821,7 +821,7 @@ GameObject:
   - component: {fileID: 4842853453199442}
   - component: {fileID: 114382604437484338}
   m_Layer: 0
-  m_Name: nav_TOP
+  m_Name: nav_END
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -943,7 +943,7 @@ GameObject:
   - component: {fileID: 4357863969958140}
   - component: {fileID: 114323234910046296}
   m_Layer: 0
-  m_Name: nav_TOP
+  m_Name: nav_END
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1193,7 +1193,7 @@ GameObject:
   - component: {fileID: 4742906424876216}
   - component: {fileID: 114194504576447058}
   m_Layer: 0
-  m_Name: nav_BOTTOM
+  m_Name: nav_START
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1317,7 +1317,7 @@ GameObject:
   - component: {fileID: 4184301235652712}
   - component: {fileID: 114466751992647886}
   m_Layer: 0
-  m_Name: nav_BOTTOM
+  m_Name: nav_START
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1333,7 +1333,7 @@ GameObject:
   - component: {fileID: 4389923252043280}
   - component: {fileID: 114725595482008728}
   m_Layer: 0
-  m_Name: nav_TOP
+  m_Name: nav_END
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1581,7 +1581,7 @@ GameObject:
   - component: {fileID: 4814573360767774}
   - component: {fileID: 114735724725988304}
   m_Layer: 0
-  m_Name: nav_BOTTOM
+  m_Name: nav_START
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7218,8 +7218,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   connects_FROM: {fileID: 0}
   connects_TO: {fileID: 0}
-  nav_BOTTOM: {fileID: 4742906424876216}
-  nav_TOP: {fileID: 4483249590775234}
+  nav_START: {fileID: 4742906424876216}
+  nav_END: {fileID: 4483249590775234}
 --- !u!114 &114194504576447058
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -7244,8 +7244,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   connects_FROM: {fileID: 0}
   connects_TO: {fileID: 0}
-  nav_BOTTOM: {fileID: 4184301235652712}
-  nav_TOP: {fileID: 4357863969958140}
+  nav_START: {fileID: 4184301235652712}
+  nav_END: {fileID: 4357863969958140}
 --- !u!114 &114323234910046296
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -7292,8 +7292,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   connects_FROM: {fileID: 0}
   connects_TO: {fileID: 0}
-  nav_BOTTOM: {fileID: 4375826259545952}
-  nav_TOP: {fileID: 4842853453199442}
+  nav_START: {fileID: 4375826259545952}
+  nav_END: {fileID: 4842853453199442}
 --- !u!114 &114606952771517262
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -7307,8 +7307,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   connects_FROM: {fileID: 0}
   connects_TO: {fileID: 0}
-  nav_BOTTOM: {fileID: 4814573360767774}
-  nav_TOP: {fileID: 4389923252043280}
+  nav_START: {fileID: 4814573360767774}
+  nav_END: {fileID: 4389923252043280}
 --- !u!114 &114714827365311454
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -7353,8 +7353,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24305a99c50364660a76547a001f9bd8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  carriageCount: 0
   walkways: []
   stairs_FRONT_CROSS: {fileID: 114253827140286778}
   stairs_BACK_CROSS: {fileID: 114485383125700058}
   stairs_UP: {fileID: 114606952771517262}
   stairs_DOWN: {fileID: 114168883000347002}
+  queuePoints: []

@@ -11,6 +11,7 @@ public class Platform : MonoBehaviour
     public BezierPoint point_platform_START, point_platform_END;
     public Queue<Commuter>[] platformQueues;
     public Vector3[] queuePoints;
+    public Train currentTrainAtPlatform;
 
     public void SetupPlatform(MetroLine _parentMetroLine, BezierPoint _start, BezierPoint _end)
     {
@@ -23,7 +24,7 @@ public class Platform : MonoBehaviour
         // setup queue lists and spacing
         platformQueues = new Queue<Commuter>[carriageCount];
         queuePoints = new Vector3[carriageCount];
-        Vector3 frontQueuePoint = new Vector3(0f,0f,2f);
+        Vector3 frontQueuePoint = transform.position + new Vector3(0f,0f,2f);
         for (int i = 0; i < carriageCount; i++)
         {
             platformQueues[i] = new Queue<Commuter>();
@@ -47,7 +48,7 @@ public class Platform : MonoBehaviour
 
     public Commuter AddCommuter(Walkway _journeyStart, Walkway _journeyEnd)
     {
-        Vector3 walkwayTop = _journeyStart.nav_TOP.transform.position;
+        Vector3 walkwayTop = _journeyStart.nav_END.transform.position;
         GameObject commuter_OBJ =(GameObject) Instantiate(Metro.INSTANCE.prefab_commuter, walkwayTop, transform.rotation);
         Commuter _C = commuter_OBJ.GetComponent<Commuter>();
         _C.Init(this, _journeyStart);
@@ -64,6 +65,19 @@ public class Platform : MonoBehaviour
         return queuePoints[_queueIndex];
     }
 
+    public void AllowQueuesReadyToBoard(Train _train)
+    {
+        currentTrainAtPlatform = _train;
+        for (int i = 0; i < carriageCount; i++)
+        {
+            foreach (Commuter _COMMUTER in platformQueues[i])
+            {
+                
+                _COMMUTER.BoardTrain(_train, _train.carriages[i].door_RIGHT, _train.carriages[i].AssignSeat());
+            }
+        }
+    }
+
     public int Get_ShortestQueue()
     {
         int shortest = 0;
@@ -78,16 +92,14 @@ public class Platform : MonoBehaviour
             }
         }
 
+        Debug.Log("shortest queue: " + shortest + ", length: " + queueLength);
+        
         if (queueLength == 0)
         {
             // all are zero - do something random maybe?
+            shortest =  Mathf.FloorToInt(Random.Range(0, carriageCount));
         }
 
         return shortest;
-    }
-
-    public Commuter Get_LastInQueue(int _queueIndex)
-    {
-        return platformQueues[_queueIndex].Peek();
     }
 }

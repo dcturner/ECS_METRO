@@ -224,8 +224,8 @@ MonoBehaviour:
   - RED LINE
   - TEAL LINE
   - ORANGE LINE
-  maxTrains: 050000000500000005000000
-  carriagesPerTrain: 030000000300000003000000
+  maxTrains: 010000000500000005000000
+  carriagesPerTrain: 010000000300000003000000
   trainCarriageSpacing:
   - 0.1
   - 0.1

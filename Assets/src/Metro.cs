@@ -179,6 +179,20 @@ public class Metro : MonoBehaviour
     {
         Platform _P = metroLines[0].platforms[0];
         commuters.Add(_P.AddCommuter(_P.stairs_FRONT_CROSS, null));
+        commuters.Add(_P.AddCommuter(_P.stairs_BACK_CROSS, null));
+        commuters.Add(_P.AddCommuter(_P.stairs_UP, null));
+        commuters.Add(_P.AddCommuter(_P.stairs_FRONT_CROSS, null));
+        commuters.Add(_P.AddCommuter(_P.stairs_BACK_CROSS, null));
+        commuters.Add(_P.AddCommuter(_P.stairs_UP, null));
+        commuters.Add(_P.AddCommuter(_P.stairs_FRONT_CROSS, null));
+        commuters.Add(_P.AddCommuter(_P.stairs_BACK_CROSS, null));
+        commuters.Add(_P.AddCommuter(_P.stairs_UP, null));
+    }
+
+    public void Remove_Commuter(Commuter _commuter)
+    {
+        commuters.Remove(_commuter);
+        Destroy(_commuter.gameObject);
     }
 
     public void Update_Commuters()

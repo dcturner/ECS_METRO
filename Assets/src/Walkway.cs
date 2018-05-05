@@ -6,14 +6,14 @@ using UnityEngine;
 public class Walkway : MonoBehaviour {
 
     public Platform connects_FROM, connects_TO;
-    public Transform nav_BOTTOM, nav_TOP;
+    public Transform nav_START, nav_END;
 
     private void OnDrawGizmos()
     {
-        if (nav_TOP != null && nav_BOTTOM != null)
+        if (nav_END != null && nav_START != null)
         {
             Gizmos.color = Color.magenta;
-            Gizmos.DrawLine(nav_BOTTOM.position, nav_TOP.position);
+            Gizmos.DrawLine(nav_START.position, nav_END.position);
         }
     }
 }

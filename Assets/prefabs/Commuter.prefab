@@ -137,7 +137,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42d37f500a2604b7d85cc41a170dd501, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _currentDestination: {x: 0, y: 0, z: 0}
-  _currentWalkway: {fileID: 0}
+  body: {fileID: 4444447928485422}
+  currentPlatform: {fileID: 0}
   route_START: {fileID: 0}
   route_END: {fileID: 0}
+  targetPlatform: {fileID: 0}
+  currentTrainDoor: {fileID: 0}
+  currentSeat: {fileID: 0}

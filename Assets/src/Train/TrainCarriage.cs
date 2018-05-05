@@ -5,10 +5,10 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using UnityEditor;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class TrainCarriage : MonoBehaviour
 {
-
     public const float CARRIAGE_LENGTH = 5f;
     public const float CARRIAGE_SPACING = 1f;
     public const int CARRIAGE_CAPACITY = 10;
@@ -22,7 +22,7 @@ public class TrainCarriage : MonoBehaviour
     public TrainCarriage_door door_RIGHT;
     public GameObject[] RecolouredObjects;
 
-    
+
     private Transform t;
     private Material mat;
 
@@ -61,5 +61,25 @@ public class TrainCarriage : MonoBehaviour
                 _R.material.color = _lineColour;
             }
         }
+    }
+
+    public CommuterNavPoint AssignSeat()
+    {
+        if (seats_FREE.Count > 0)
+        {
+            CommuterNavPoint _seat = seats_FREE[(Random.Range(0, seats_FREE.Count - 1))];
+            seats_TAKEN.Add(_seat);
+            seats_FREE.Remove(_seat);
+            return _seat;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public void VacateSeat(CommuterNavPoint _seat)
+    {
+        seats_TAKEN.Remove(_seat);
     }
 }
