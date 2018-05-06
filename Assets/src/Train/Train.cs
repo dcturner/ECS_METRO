@@ -129,7 +129,7 @@ public class Train
                     trainAhead_stopPoint += 1f;
                 }
 
-                float distanceToTrainAhead = (trainAhead_stopPoint - currentPosition);
+                float distanceToTrainAhead = Mathf.Abs(trainAhead_stopPoint - currentPosition);
                 if (distanceToTrainAhead > 0.05f || parentLine.maxTrains == 1)
                 {
                     if (speed <= parentLine.maxTrainSpeed)
@@ -139,7 +139,7 @@ public class Train
                 }
                 else
                 {
-//                    Debug.Log(trainIndex + " dist to " + trainAheadOfMe.trainIndex +  " = " + distanceToTrainAhead);
+                    Debug.Log(trainIndex + " : stopped behind " + trainAheadOfMe.trainIndex + ",  dist = " + distanceToTrainAhead);
                     speed *= 0.85f;
                 }
 
@@ -190,7 +190,7 @@ public class Train
             case TrainState.UNLOADING:
                 if (trainIndex == 0)
                 {
-                    Debug.Log("still to DISEMBARK: " + passengers_to_DISEMBARK.Count);
+//                    Debug.Log("still to DISEMBARK: " + passengers_to_DISEMBARK.Count);
                 }
 
                 if (passengers_to_DISEMBARK.Count == 0)
@@ -203,7 +203,7 @@ public class Train
 
                 if (trainIndex == 0)
                 {
-                    Debug.Log("still to EMBARK: " + passengers_to_EMBARK.Count);
+//                    Debug.Log("still to EMBARK: " + passengers_to_EMBARK.Count);
                 }
                 if (passengers_to_EMBARK.Count == 0)
                 {
