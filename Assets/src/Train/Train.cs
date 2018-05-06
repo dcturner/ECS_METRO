@@ -100,6 +100,8 @@ public class Train
                 Prepare_EMBARK();
                 break;
             case TrainState.DOORS_CLOSE:
+                passengers_to_DISEMBARK.Clear();
+                passengers_to_EMBARK.Clear();
                 // once totalPassengers == (totalPassengers + (waitingToBoard - availableSpaces)) - shut the doors
                 stateDelay = Metro.INSTANCE.Train_delay_doors_CLOSE;
                 // sort out vars for next stop (nextPlatform, door side, passengers wanting to get off etc)
@@ -128,7 +130,7 @@ public class Train
                 }
 
                 float distanceToTrainAhead = (trainAhead_stopPoint - currentPosition);
-                if (distanceToTrainAhead > 0.05f)
+                if (distanceToTrainAhead > 0.05f || parentLine.maxTrains == 1)
                 {
                     if (speed <= parentLine.maxTrainSpeed)
                     {
@@ -289,7 +291,6 @@ public class Train
 
     void Prepare_DISEMBARK()
     {
-        passengers_to_DISEMBARK.Clear();
         for (int i = 0; i < totalCarriages; i++)
         {
             TrainCarriage _CARRIAGE = carriages[i];
@@ -310,7 +311,6 @@ public class Train
 
     void Prepare_EMBARK()
     {
-        passengers_to_EMBARK.Clear();
         for (int i = 0; i < totalCarriages; i++)
         {
             TrainCarriage _CARRIAGE = carriages[i];
@@ -326,6 +326,7 @@ public class Train
                     {
                         _COMMUTER.currentSeat = _CARRIAGE.AssignSeat();
                         passengers_to_EMBARK.Add(_COMMUTER);
+                        nextPlatform.platformQueues[i].Dequeue();
                         _COMMUTER.BoardTrain(this, _CARRIAGE.door_RIGHT);
                     }
                     else
@@ -352,6 +353,5 @@ public class Train
         TrainCarriage _CARRIAGE = carriages[_carriageIndex];
         _CARRIAGE.passengers.Remove(_commuter);
         passengers_to_DISEMBARK.Remove(_commuter);
-        _commuter.transform.SetParent(Metro.INSTANCE.transform);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -154,7 +155,7 @@ public class Commuter : MonoBehaviour
                 {
 //                    Debug.Log("Crossing over - shorter journey from opposite platform");
                    Add_WalkToOppositePlatform(_CURRENT_PLATFORM, _OPPOSITE_PLATFORM);
-                Add_TrainConnection(_OPPOSITE_PLATFORM, FinalDestination);
+                Add_TrainConnection(_OPPOSITE_PLATFORM, FinalDestination.oppositePlatform);
                 }
                 else
                 {
@@ -291,11 +292,12 @@ public class Commuter : MonoBehaviour
                 case CommuterState.WAIT_FOR_STOP:
                     break;
                 case CommuterState.GET_OFF_TRAIN:
+                    t.SetParent(Metro.INSTANCE.transform);
                     currentTask.destinationIndex = 0;
                     currentTask.destinations = new Vector3[]
                     {
-//                        currentTrainDoor.door_navPoint.transform.position,
-                        currentTask.endPlatform.queuePoints[carriageQueueIndex].transform.position
+                        currentTrainDoor.door_navPoint.transform.position,
+//                        currentTask.endPlatform.queuePoints[carriageQueueIndex].transform.position
                     };
                     break;
             }
@@ -323,4 +325,17 @@ public class Commuter : MonoBehaviour
             NextTask();
         }
     }
+    
+    #region ------------------------- < GIZMOS
+
+    private void OnDrawGizmos()
+    {
+        if (currentTrainDoor != null)
+        {
+            Gizmos.DrawLine(t.position, currentTrainDoor.transform.position);
+        }
+    }
+
+    #endregion ------------------------ GIZMOS >
+
 }

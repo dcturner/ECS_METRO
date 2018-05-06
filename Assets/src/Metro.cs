@@ -170,7 +170,7 @@ public class Metro : MonoBehaviour
 
     public void SetupCommuters()
     {
-        for (int i = 0; i < 100; i++)
+        for (int i = 0; i < 10; i++)
         {
             Platform _startPlatform = GetRandomPlatform();
             Platform _endPlatform = GetRandomPlatform();
@@ -206,6 +206,7 @@ public class Metro : MonoBehaviour
     {
         commuters.Remove(_commuter);
         Destroy(_commuter.gameObject);
+        Debug.Log("Total Commuters left: " + commuters.Count);
     }
 
     public void Update_Commuters()

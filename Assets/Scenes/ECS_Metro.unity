@@ -224,10 +224,10 @@ MonoBehaviour:
   - RED LINE
   - TEAL LINE
   - ORANGE LINE
-  maxTrains: 080000000500000005000000
+  maxTrains: 020000000500000005000000
   carriagesPerTrain: 030000000300000003000000
   maxTrainSpeed:
-  - 0.003
+  - 0.005
   - 0.00025
   - 0.00025
   LineColours:
@@ -534,8 +534,8 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 282840810}
-  m_LocalRotation: {x: -0.16603523, y: 0.824744, z: -0.30845907, w: -0.44393998}
-  m_LocalPosition: {x: 28.991882, y: 28.309877, z: -8.439003}
+  m_LocalRotation: {x: -0.34648725, y: -0.38721663, z: 0.15985058, w: -0.83931977}
+  m_LocalPosition: {x: -119.53703, y: 114.29119, z: -247.0669}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 73224422}
