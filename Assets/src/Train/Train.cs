@@ -73,7 +73,6 @@ public class Train
     void Update_NextPlatform()
     {
         nextPlatform = parentLine.Get_NextPlatform(currentPosition, nextPlatform);
-        passengers_to_DISEMBARK.Clear();
     }
 
 
@@ -86,8 +85,8 @@ public class Train
                 // keep current speed
                 break;
             case TrainState.ARRIVING:
-                PrepareForArrival();
-                speed_on_platform_arrival = speed;
+                float maxSpeed = parentLine.maxTrainSpeed;
+                speed_on_platform_arrival = Mathf.Clamp(speed, maxSpeed * 0.1f, maxSpeed);
                 break;
             case TrainState.DOORS_OPEN:
                 // slight delay, then open the required door
@@ -95,11 +94,10 @@ public class Train
                 stateDelay = Metro.INSTANCE.Train_delay_doors_OPEN;
                 break;
             case TrainState.UNLOADING:
-                AllowPassengersToLeave();
-                // wait until totalPassengers == (totalPassengers - passengersLeavingAtNextStop)
+                Prepare_DISEMBARK();
                 break;
             case TrainState.LOADING:
-                nextPlatform.AllowQueuesToBoard(this);
+                Prepare_EMBARK();
                 break;
             case TrainState.DOORS_CLOSE:
                 // once totalPassengers == (totalPassengers + (waitingToBoard - availableSpaces)) - shut the doors
@@ -118,15 +116,32 @@ public class Train
         }
     }
 
-    public void Update(float _carriageSpacing)
+    public void Update()
     {
         switch (state)
         {
             case TrainState.EN_ROUTE:
-                if (speed <= parentLine.maxTrainSpeed)
+                float trainAhead_stopPoint = trainAheadOfMe.currentPosition;
+                if (trainAheadOfMe.trainIndex < trainIndex)
                 {
-                    speed += accelerationStrength;
+                    trainAhead_stopPoint += 1f;
                 }
+
+                float distanceToTrainAhead = (trainAhead_stopPoint - currentPosition);
+                if (distanceToTrainAhead > 0.05f)
+                {
+                    if (speed <= parentLine.maxTrainSpeed)
+                    {
+                        speed += accelerationStrength;
+                    }
+                }
+                else
+                {
+//                    Debug.Log(trainIndex + " dist to " + trainAheadOfMe.trainIndex +  " = " + distanceToTrainAhead);
+                    speed *= 0.85f;
+                }
+
+
 
                 if (parentLine.Get_RegionIndex(currentPosition) == nextPlatform.point_platform_START.index)
                 {
@@ -162,13 +177,20 @@ public class Train
                             allReady = false;
                         }
                     }
+
                     if (allReady)
                     {
                         ChangeState(TrainState.UNLOADING);
                     }
                 }
+
                 break;
             case TrainState.UNLOADING:
+                if (trainIndex == 0)
+                {
+                    Debug.Log("still to DISEMBARK: " + passengers_to_DISEMBARK.Count);
+                }
+
                 if (passengers_to_DISEMBARK.Count == 0)
                 {
                     ChangeState(TrainState.LOADING);
@@ -176,13 +198,16 @@ public class Train
 
                 break;
             case TrainState.LOADING:
-                if (Timer.TimerReachedZero(ref stateDelay))
+
+                if (trainIndex == 0)
                 {
-                    if (passengers_to_DISEMBARK.Count == 0 && passengers_to_EMBARK.Count == 0)
-                    {
-                        ChangeState(TrainState.DOORS_CLOSE);
-                    }
+                    Debug.Log("still to EMBARK: " + passengers_to_EMBARK.Count);
                 }
+                if (passengers_to_EMBARK.Count == 0)
+                {
+                    ChangeState(TrainState.DOORS_CLOSE);
+                }
+
 
                 break;
             case TrainState.DOORS_CLOSE:
@@ -196,11 +221,13 @@ public class Train
                             allReady = false;
                         }
                     }
+
                     if (allReady)
                     {
                         ChangeState(TrainState.DEPARTING);
                     }
                 }
+
                 break;
             case TrainState.DEPARTING:
                 // slight delay
@@ -260,26 +287,37 @@ public class Train
         }
     }
 
-    void PrepareForArrival()
+    void Prepare_DISEMBARK()
     {
         passengers_to_DISEMBARK.Clear();
-        passengers_to_EMBARK.Clear();
         for (int i = 0; i < totalCarriages; i++)
         {
             TrainCarriage _CARRIAGE = carriages[i];
             foreach (Commuter _PASSENGER in _CARRIAGE.passengers)
             {
-                if (_PASSENGER.targetPlatform == nextPlatform)
+                if (_PASSENGER.FinalDestination == nextPlatform ||
+                    nextPlatform.oppositePlatform == _PASSENGER.FinalDestination)
                 {
                     passengers_to_DISEMBARK.Add(_PASSENGER);
                     _CARRIAGE.seats_TAKEN.Remove(_PASSENGER.currentSeat);
                     _CARRIAGE.seats_FREE.Add(_PASSENGER.currentSeat);
                     _PASSENGER.currentSeat = null;
+                    _PASSENGER.LeaveTrain();
                 }
             }
+        }
+    }
 
-            if(nextPlatform.platformQueues[i].Count >0){
-            Commuter[] carriageQueue = nextPlatform.platformQueues[i].ToArray();
+    void Prepare_EMBARK()
+    {
+        passengers_to_EMBARK.Clear();
+        for (int i = 0; i < totalCarriages; i++)
+        {
+            TrainCarriage _CARRIAGE = carriages[i];
+
+            if (nextPlatform.platformQueues[i].Count > 0)
+            {
+                Commuter[] carriageQueue = nextPlatform.platformQueues[i].ToArray();
 
                 for (int queueIndex = 0; queueIndex < carriageQueue.Length; queueIndex++)
                 {
@@ -288,6 +326,7 @@ public class Train
                     {
                         _COMMUTER.currentSeat = _CARRIAGE.AssignSeat();
                         passengers_to_EMBARK.Add(_COMMUTER);
+                        _COMMUTER.BoardTrain(this, _CARRIAGE.door_RIGHT);
                     }
                     else
                     {
@@ -298,15 +337,7 @@ public class Train
         }
     }
 
-    void AllowPassengersToLeave()
-    {
-        foreach (Commuter _COMMUTER in passengers_to_DISEMBARK)
-        {
-            _COMMUTER.LeaveTrain();
-        }
-    }
-
-    public void Commuter_EMBARK(Commuter _commuter, int _carriageIndex)
+    public void Commuter_EMBARKED(Commuter _commuter, int _carriageIndex)
     {
         passengers.Add(_commuter);
         TrainCarriage _CARRIAGE = carriages[_carriageIndex];
@@ -314,7 +345,8 @@ public class Train
         passengers_to_EMBARK.Remove(_commuter);
         _commuter.transform.SetParent(_CARRIAGE.transform);
     }
-    public void Commuter_DISEMBARK(Commuter _commuter, int _carriageIndex)
+
+    public void Commuter_DISEMBARKED(Commuter _commuter, int _carriageIndex)
     {
         passengers.Remove(_commuter);
         TrainCarriage _CARRIAGE = carriages[_carriageIndex];

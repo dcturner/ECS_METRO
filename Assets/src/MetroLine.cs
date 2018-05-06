@@ -23,6 +23,7 @@ public class MetroLine  {
     public float train_brakeStrength = 0.01f;
     public float train_friction = 0.95f;
     public float speedRatio;
+    public float carriageLength_onRail;
 
     public MetroLine(int metroLineIndex, int _maxTrains)
     {
@@ -103,6 +104,7 @@ public class MetroLine  {
             }
         }
         bezierPath.MeasurePath();
+        carriageLength_onRail = Get_distanceAsRailProportion(TrainCarriage.CARRIAGE_LENGTH) + Get_distanceAsRailProportion(TrainCarriage.CARRIAGE_SPACING);
         
         // now that the rails have been laid - let's put the platforms on
         int totalPoints = bezierPath.points.Count;
@@ -147,11 +149,10 @@ public class MetroLine  {
     }
 
     public void UpdateTrains()
-    {
-        float _carriageSpacing = Get_distanceAsRailProportion(TrainCarriage.CARRIAGE_SPACING);
+    { 
         foreach (Train _t in trains)
         {
-            _t.Update(_carriageSpacing);
+            _t.Update();
         }
     }
 
@@ -199,6 +200,22 @@ public class MetroLine  {
             }
         }
         
+        return result;
+    }
+
+    public bool IsPlatformEndPoint(int _pointIndex)
+    {
+        bool result = false;
+
+        foreach (Platform _PLATFORM in platforms)
+        {
+            if (_PLATFORM.point_platform_END.index == _pointIndex)
+            {
+                result = true;
+                break;
+            }
+        }
+
         return result;
     }
 }

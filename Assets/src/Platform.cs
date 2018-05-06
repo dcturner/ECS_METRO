@@ -55,47 +55,29 @@ public class Platform : MonoBehaviour
         Colour.RecolourChildren(walkway_DOWN.transform, _LINE_COLOUR);
     }
 
-    public void AllowQueuesToBoard(Train _train)
-    {
-        currentTrainAtPlatform = _train;
-        for (int i = 0; i < carriageCount; i++)
-        {
-            foreach (Commuter _COMMUTER in platformQueues[i])
-            {
-                if (_COMMUTER.currentSeat != null)
-                {
-                    _COMMUTER.BoardTrain(_train, _train.carriages[i].door_RIGHT, _train.carriages[i].AssignSeat());
-                }
-            }
-        }
-    }
-
     public int Get_NumberOfStopsTo(Platform _destination)
     {
-        int count = 9999;
-        int startAt = point_platform_END.index;
+        int count = 1;
+        int startIndex = point_platform_END.index;
+        int targetIndex = _destination.point_platform_END.index;
         BezierPath _PATH = parentMetroLine.bezierPath;
-        int totalPointsOnLine = _PATH.points.Count;
-
-        for (int i = 1; i < totalPointsOnLine; i++)
+        int totalPoints = _PATH.points.Count;
+        for (int i = 1; i < totalPoints; i++)
         {
-            int _TEST_INDEX = (startAt + i) % totalPointsOnLine;
-            count = i;
-            foreach (Platform _PLATFORM in parentMetroLine.platforms)
+            int _TEST_INDEX = (startIndex + i) % totalPoints;
+            if (parentMetroLine.IsPlatformEndPoint(_TEST_INDEX))
             {
-                if (_PLATFORM.point_platform_END.index == _TEST_INDEX)
+                count++;
+                if (_TEST_INDEX == targetIndex)
                 {
-                    if (_PLATFORM.HasWalkwayTo(_destination) != null || _PLATFORM.oppositePlatform == _destination)
-                    {
-                        return count;
-                    }
+                    break;
                 }
             }
         }
 
         return count;
     }
-
+    
     public Walkway HasWalkwayTo(Platform _platform)
     {
         foreach (Walkway _WALKWAY in walkways)

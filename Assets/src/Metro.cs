@@ -159,8 +159,8 @@ public class Metro : MonoBehaviour
                 MetroLine _ML = metroLines[i];
                 for (int trainIndex = 0; trainIndex < _ML.maxTrains; trainIndex++)
                 {
-                    Train _T = _ML.trains[i];
-                    _T.trainAheadOfMe = _ML.trains[(i + 1) % _ML.maxTrains];
+                    Train _T = _ML.trains[trainIndex];
+                    _T.trainAheadOfMe = _ML.trains[(trainIndex + 1) % _ML.maxTrains];
                 }
             }
         }
@@ -170,7 +170,7 @@ public class Metro : MonoBehaviour
 
     public void SetupCommuters()
     {
-        for (int i = 0; i < 1; i++)
+        for (int i = 0; i < 100; i++)
         {
             Platform _startPlatform = GetRandomPlatform();
             Platform _endPlatform = GetRandomPlatform();
