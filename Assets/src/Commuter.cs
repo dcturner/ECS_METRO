@@ -114,7 +114,7 @@ public class Commuter : MonoBehaviour
 
     void SetupRoute()
     {
-        route_TaskList = new Queue<CommuterTask>();
+        route_TaskList = Metro.INSTANCE.ShortestRoute(currentPlatform, FinalDestination);
         NextTask();
     }
 

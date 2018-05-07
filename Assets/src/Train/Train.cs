@@ -139,7 +139,7 @@ public class Train
                 }
                 else
                 {
-                    Debug.Log(trainIndex + " : stopped behind " + trainAheadOfMe.trainIndex + ",  dist = " + distanceToTrainAhead);
+//                    Debug.Log(trainIndex + " : stopped behind " + trainAheadOfMe.trainIndex + ",  dist = " + distanceToTrainAhead);
                     speed *= 0.85f;
                 }
 

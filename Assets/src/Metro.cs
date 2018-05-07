@@ -42,6 +42,7 @@ public class Metro : MonoBehaviour
     [HideInInspector] public MetroLine[] metroLines;
 
     [HideInInspector] public List<Commuter> commuters;
+    [HideInInspector] private Platform[] allPlatforms;
 
     public static string GetLine_NAME_FromIndex(int _index)
     {
@@ -125,13 +126,13 @@ public class Metro : MonoBehaviour
         }
 
 
-        Platform[] _PLATFORMS = FindObjectsOfType<Platform>();
-        for (int i = 0; i < _PLATFORMS.Length; i++)
+        allPlatforms = FindObjectsOfType<Platform>();
+        for (int i = 0; i < allPlatforms.Length; i++)
         {
-            Platform _PA = _PLATFORMS[i];
+            Platform _PA = allPlatforms[i];
             Vector3 _PA_START = _PA.point_platform_START.location;
             Vector3 _PA_END = _PA.point_platform_END.location;
-            foreach (Platform _PB in _PLATFORMS)
+            foreach (Platform _PB in allPlatforms)
             {
                 if (_PB != _PA)
                 {
@@ -145,20 +146,6 @@ public class Metro : MonoBehaviour
                     if ((aSTART_to_bSTART && aEND_to_bEND) || (aEND_to_bSTART && aSTART_to_bEND))
                     {
                         _PA.Add_AdjacentPlatform(_PB);
-                    }
-                }
-            }
-        }
-
-        foreach (MetroLine _ML in metroLines)
-        {
-            foreach (MetroLine _OTHER_ML in metroLines)
-            {
-                if (_OTHER_ML != _ML)
-                {
-                    if (_ML.Has_ConnectionToMetroLine(_OTHER_ML))
-                    {
-                        Debug.Log(_ML.lineName + " is connected to " + _OTHER_ML.lineName);
                     }
                 }
             }
@@ -216,16 +203,20 @@ public class Metro : MonoBehaviour
 
     public void SetupCommuters()
     {
-        for (int i = 0; i < 100; i++)
+        for (int i = 0; i < 1; i++)
         {
             Platform _startPlatform = GetRandomPlatform();
             Platform _endPlatform = GetRandomPlatform();
+            // TODO put route possibility check back in
+//            while (_endPlatform == _startPlatform || !RouteisPossible(_startPlatform, _endPlatform))
             while (_endPlatform == _startPlatform)
             {
                 _endPlatform = GetRandomPlatform();
             }
 
-            AddCommuter(_startPlatform, _endPlatform);
+//            AddCommuter(_startPlatform, _endPlatform);
+
+            AddCommuter(metroLines[0].platforms[0], metroLines[1].platforms[2]);
         }
     }
 
@@ -247,7 +238,6 @@ public class Metro : MonoBehaviour
         commuters.Add(_C);
     }
 
-
     public void Remove_Commuter(Commuter _commuter)
     {
         commuters.Remove(_commuter);
@@ -263,6 +253,102 @@ public class Metro : MonoBehaviour
     }
 
     #endregion -------------------------------------- Commuters >>
+
+
+    #region ------------------------- < PATH ALGORITHM
+
+    public bool RouteisPossible(Platform _A, Platform _B)
+    {
+        MetroLine _lineA = _A.parentMetroLine;
+        MetroLine _lineB = _B.parentMetroLine;
+
+        if (_lineA == _lineB)
+        {
+            return true;
+        }
+
+        return _lineA.Has_ConnectionToMetroLine(_lineB);
+    }
+
+    public Queue<CommuterTask> ShortestRoute(Platform _A, Platform _B)
+    {
+        Debug.Log("Getting from "+_A.GetFullName()+" to "+_B.GetFullName());
+        foreach (Platform _P in allPlatforms)
+        {
+            _P.temporary_routeDistance = 999;
+        }
+
+        int steps = 0;
+        List<Platform> _ROUTE_PLATFORMS = new List<Platform>();
+
+
+        // Add MAIN platform (and adjacents)
+        Include_platform_if_new_or_improved(_ROUTE_PLATFORMS, _A, steps);
+        foreach (Platform _ADJ in _A.adjacentPlatforms)
+        {
+            Include_platform_if_new_or_improved(_ROUTE_PLATFORMS, _ADJ, steps);
+            Include_platform_if_new_or_improved(_ROUTE_PLATFORMS, _ADJ.oppositePlatform, steps);
+        }
+        // Add OPPOSITE platform (and adjacents)
+        Include_platform_if_new_or_improved(_ROUTE_PLATFORMS, _A.oppositePlatform, steps);
+        foreach (Platform _ADJ in _A.oppositePlatform.adjacentPlatforms)
+        {
+            Include_platform_if_new_or_improved(_ROUTE_PLATFORMS, _ADJ, steps);
+            Include_platform_if_new_or_improved(_ROUTE_PLATFORMS, _ADJ.oppositePlatform, steps);
+        }
+
+        bool arrived = _ROUTE_PLATFORMS.Contains(_B);
+        for (int i = 0; i < 100; i++)
+        {
+            if (arrived)
+            {
+                Debug.Log("Arrived at " + _B.GetFullName() + " after "+steps+" steps");
+                break;
+            }
+            steps++;
+            _ROUTE_PLATFORMS = ExpandPlatformSelection(_ROUTE_PLATFORMS, steps);
+            arrived = _ROUTE_PLATFORMS.Contains(_B);
+        }
+
+        return null;
+    }
+
+
+    List<Platform> ExpandPlatformSelection(List<Platform> _input, int _currentStep)
+    {
+        List<Platform> result = new List<Platform>();
+        foreach (Platform _P in _input)
+        {
+            Include_platform_if_new_or_improved(result, _P.nextPlatform, _currentStep);
+            foreach (Platform _ADJ in _P.adjacentPlatforms)
+            {
+                Include_platform_if_new_or_improved(result, _ADJ.nextPlatform, _currentStep);
+                Include_platform_if_new_or_improved(result, _ADJ.nextPlatform.oppositePlatform, _currentStep);
+            }
+
+            Include_platform_if_new_or_improved(result, _P.nextPlatform.oppositePlatform, _currentStep);
+            foreach (Platform _ADJ in _P.nextPlatform.oppositePlatform.adjacentPlatforms)
+            {
+                Include_platform_if_new_or_improved(result, _ADJ.nextPlatform, _currentStep);
+                Include_platform_if_new_or_improved(result, _ADJ.nextPlatform.oppositePlatform, _currentStep);
+            }
+        }
+
+        return result;
+    }
+
+    void Include_platform_if_new_or_improved(List<Platform> _platformList, Platform _testPlatform, int _currentStep)
+    {
+        if (_testPlatform.temporary_routeDistance > _currentStep)
+        {
+            _testPlatform.temporary_routeDistance = _currentStep;
+            Debug.Log(_testPlatform.GetFullName() +
+                      " distance is now " + _testPlatform.temporary_routeDistance);
+            _platformList.Add(_testPlatform);
+        }
+    }
+
+    #endregion ------------------------ PATH ALGORITHM >
 
 
     #region ------------------------- < GIZMOS

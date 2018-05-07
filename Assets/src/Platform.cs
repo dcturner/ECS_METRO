@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class Platform : MonoBehaviour
@@ -53,7 +54,7 @@ public class Platform : MonoBehaviour
 
     public void Add_AdjacentPlatform(Platform _platform)
     {
-        if (!adjacentPlatforms.Contains(_platform))
+        if (!adjacentPlatforms.Contains(_platform) && _platform != oppositePlatform)
         {
             Debug.Log(parentMetroLine.metroLine_index + "_" + point_platform_END.index + "   is adjacent to  " 
                       +_platform.parentMetroLine.metroLine_index+"_"+_platform.point_platform_END.index);
@@ -67,11 +68,6 @@ public class Platform : MonoBehaviour
         Color _LINE_COLOUR = parentMetroLine.lineColour;
         Colour.RecolourChildren(walkway_FRONT_CROSS.transform, _LINE_COLOUR);
         Colour.RecolourChildren(walkway_BACK_CROSS.transform, _LINE_COLOUR);
-    }
-
-    public int Get_NumberOfStopsTo(Platform _destination)
-    {
-        return _destination.platformIndex - platformIndex;
     }
 
     public int Get_ShortestQueue()
@@ -95,5 +91,16 @@ public class Platform : MonoBehaviour
         }
 
         return shortest;
+    }
+
+    public string GetFullName()
+    {
+        return parentMetroLine.lineName + "_" + platformIndex;
+    }
+
+    private void OnDrawGizmos()
+    {
+        Handles.color = Color.black;
+        Handles.Label(transform.position, ""+temporary_routeDistance);
     }
 }
