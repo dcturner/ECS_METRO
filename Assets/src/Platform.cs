@@ -4,15 +4,19 @@ using UnityEngine;
 
 public class Platform : MonoBehaviour
 {
-    public int carriageCount;
+    public int carriageCount, platformIndex;
     public MetroLine parentMetroLine;
     public List<Walkway> walkways;
-    public Walkway walkway_FRONT_CROSS, walkway_BACK_CROSS, walkway_UP, walkway_DOWN;
+    public Walkway walkway_FRONT_CROSS, walkway_BACK_CROSS;
     public BezierPoint point_platform_START, point_platform_END;
     public Platform oppositePlatform;
+    public Platform nextPlatform;
+    public List<Platform> adjacentPlatforms;
     public Queue<Commuter>[] platformQueues;
     public CommuterNavPoint[] queuePoints;
     public Train currentTrainAtPlatform;
+
+    public int temporary_routeDistance = 0;
 
     public void SetupPlatform(MetroLine _parentMetroLine, BezierPoint _start, BezierPoint _end)
     {
@@ -20,6 +24,7 @@ public class Platform : MonoBehaviour
         point_platform_START = _start;
         point_platform_END = _end;
         carriageCount = parentMetroLine.carriagesPerTrain;
+        adjacentPlatforms = new List<Platform>();
         SetColour();
         
         // setup queue lists and spacing
@@ -46,49 +51,27 @@ public class Platform : MonoBehaviour
         walkway_BACK_CROSS.connects_TO = oppositePlatform;
     }
 
+    public void Add_AdjacentPlatform(Platform _platform)
+    {
+        if (!adjacentPlatforms.Contains(_platform))
+        {
+            Debug.Log(parentMetroLine.metroLine_index + "_" + point_platform_END.index + "   is adjacent to  " 
+                      +_platform.parentMetroLine.metroLine_index+"_"+_platform.point_platform_END.index);
+            adjacentPlatforms.Add(_platform);
+            _platform.Add_AdjacentPlatform(this);
+        }
+    }
+
     public void SetColour()
     {
         Color _LINE_COLOUR = parentMetroLine.lineColour;
         Colour.RecolourChildren(walkway_FRONT_CROSS.transform, _LINE_COLOUR);
         Colour.RecolourChildren(walkway_BACK_CROSS.transform, _LINE_COLOUR);
-        Colour.RecolourChildren(walkway_UP.transform, _LINE_COLOUR);
-        Colour.RecolourChildren(walkway_DOWN.transform, _LINE_COLOUR);
     }
 
     public int Get_NumberOfStopsTo(Platform _destination)
     {
-        int count = 1;
-        int startIndex = point_platform_END.index;
-        int targetIndex = _destination.point_platform_END.index;
-        BezierPath _PATH = parentMetroLine.bezierPath;
-        int totalPoints = _PATH.points.Count;
-        for (int i = 1; i < totalPoints; i++)
-        {
-            int _TEST_INDEX = (startIndex + i) % totalPoints;
-            if (parentMetroLine.IsPlatformEndPoint(_TEST_INDEX))
-            {
-                count++;
-                if (_TEST_INDEX == targetIndex)
-                {
-                    break;
-                }
-            }
-        }
-
-        return count;
-    }
-    
-    public Walkway HasWalkwayTo(Platform _platform)
-    {
-        foreach (Walkway _WALKWAY in walkways)
-        {
-            if (_WALKWAY.connects_TO == _platform)
-            {
-                return _WALKWAY;
-            }
-        }
-
-        return null;
+        return _destination.platformIndex - platformIndex;
     }
 
     public int Get_ShortestQueue()

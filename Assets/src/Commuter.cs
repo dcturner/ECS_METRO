@@ -95,81 +95,50 @@ public class Commuter : MonoBehaviour
         route_TaskList.Enqueue(new CommuterTask(CommuterState.GET_OFF_TRAIN){endPlatform = _end});
     }
 
-    void Add_MetroLineChange()
-    {
-
-    }
-
-    void Add_WalkwayConnection(Walkway _walkway)
+    void Add_WalkToAdjacentPlatform(Platform _A, Platform _B)
     {
     }
 
-    void Add_WalkToOppositePlatform(Platform _start, Platform _end)
+    void Add_WalkToOppositePlatform(Platform _A, Platform _B)
     {
         route_TaskList.Enqueue(new CommuterTask(CommuterState.WALK) {
-            startPlatform =  _start,
-            endPlatform = _end,
+            startPlatform =  _A,
+            endPlatform = _B,
             destinations = new Vector3[]{
-                _start.walkway_FRONT_CROSS.nav_START.transform.position,
-                _start.walkway_FRONT_CROSS.nav_END.transform.position,
-                _end.walkway_BACK_CROSS.nav_END.transform.position,
-                _end.walkway_BACK_CROSS.nav_START.transform.position}
+                _A.walkway_FRONT_CROSS.nav_START.transform.position,
+                _A.walkway_FRONT_CROSS.nav_END.transform.position,
+                _B.walkway_BACK_CROSS.nav_END.transform.position,
+                _B.walkway_BACK_CROSS.nav_START.transform.position}
         });
     }
 
     void SetupRoute()
     {
         route_TaskList = new Queue<CommuterTask>();
-//        Debug.Log(">> NEW COMMUTER");
-//        Debug.Log("start: " + currentPlatform.point_platform_END.index);
-//        Debug.Log("end: " + FinalDestination.point_platform_END.index);
-        Platform _CURRENT_PLATFORM = currentPlatform;
-        Platform _OPPOSITE_PLATFORM = currentPlatform.oppositePlatform;
-        
-        Walkway _WALK = _CURRENT_PLATFORM.HasWalkwayTo(FinalDestination);
-        if (_WALK != null)
-        {
-            if (FinalDestination == _OPPOSITE_PLATFORM)
-            {
-//                Debug.Log("Crossing to opposite platform");
-                Add_WalkToOppositePlatform(_CURRENT_PLATFORM, FinalDestination);
-            }
-            else
-            {
-            Add_WalkwayConnection(_WALK);
-            }
-
-        }
-        else
-        {
-            // are the platforms on the same line?
-            if (_CURRENT_PLATFORM.parentMetroLine == FinalDestination.parentMetroLine)
-            {
-//                Debug.Log("Origin and Destination are on the same line");
-                int stopsFromCurrentPlatform = _CURRENT_PLATFORM.Get_NumberOfStopsTo(FinalDestination); 
-                int stopsFromOppositePlatform = _OPPOSITE_PLATFORM.Get_NumberOfStopsTo(FinalDestination);
-//                Debug.Log("stops from CURRENT platform: " + stopsFromCurrentPlatform);
-//                Debug.Log("stops from OPPOSITE platform: " + stopsFromOppositePlatform);
-                // is it quicker to go forwards or back?
-                if ( stopsFromCurrentPlatform > stopsFromOppositePlatform)
-                {
-//                    Debug.Log("Crossing over - shorter journey from opposite platform");
-                   Add_WalkToOppositePlatform(_CURRENT_PLATFORM, _OPPOSITE_PLATFORM);
-                Add_TrainConnection(_OPPOSITE_PLATFORM, FinalDestination.oppositePlatform);
-                }
-                else
-                {
-                Add_TrainConnection(_CURRENT_PLATFORM, FinalDestination);
-                }
-            }
-            else
-            {
-                // not on the same line - we need a walkway connection
-            }
-        }
         NextTask();
     }
 
+    void ShortestRoute(Platform _A, Platform _B)
+    {
+        bool isOpposite = _B == _A.oppositePlatform;
+        bool isAdjacent = _A.adjacentPlatforms.Contains(_B);
+        bool isSameLine = _A.parentMetroLine == _B.parentMetroLine;
+
+        if (isOpposite)
+        {
+            Add_WalkToOppositePlatform(_A, _B);
+        }else if (isAdjacent)
+        {
+            Add_WalkToAdjacentPlatform(_A, _B);
+        }
+        else if(isSameLine)
+        {
+            Add_TrainConnection(_A, _B);
+        }
+        else
+        {
+        }
+    }
 
 
     public void UpdateCommuter()
@@ -297,14 +266,17 @@ public class Commuter : MonoBehaviour
                     currentTask.destinations = new Vector3[]
                     {
                         currentTrainDoor.door_navPoint.transform.position,
-//                        currentTask.endPlatform.queuePoints[carriageQueueIndex].transform.position
+                        currentTrain.nextPlatform.queuePoints[carriageQueueIndex].transform.position
                     };
                     break;
             }
         }
         else
         {
-            Metro.INSTANCE.Remove_Commuter(this);
+            if (Metro.INSTANCE != null)
+            {
+                Metro.INSTANCE.Remove_Commuter(this);
+            }
         }
     }
 

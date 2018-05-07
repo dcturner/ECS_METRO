@@ -9,6 +9,7 @@ public class Metro : MonoBehaviour
     public static float CUSTOMER_SATISFACTION = 1f;
     public static float BEZIER_HANDLE_REACH = 0.1f;
     public static float BEZIER_PLATFORM_OFFSET = 3f;
+    public static float PLATFORM_ADJACENCY_LIMIT = 10f;
     public const int BEZIER_MEASUREMENT_SUBDIVISIONS = 2;
     public const float PLATFORM_ARRIVAL_THRESHOLD = 0.975f;
     public static Metro INSTANCE;
@@ -122,6 +123,51 @@ public class Metro : MonoBehaviour
         {
             Destroy(_RM);
         }
+
+
+        Platform[] _PLATFORMS = FindObjectsOfType<Platform>();
+        for (int i = 0; i < _PLATFORMS.Length; i++)
+        {
+            Platform _PA = _PLATFORMS[i];
+            Vector3 _PA_START = _PA.point_platform_START.location;
+            Vector3 _PA_END = _PA.point_platform_END.location;
+            foreach (Platform _PB in _PLATFORMS)
+            {
+                if (_PB != _PA)
+                {
+                    Vector3 _PB_START = _PB.point_platform_START.location;
+                    Vector3 _PB_END = _PB.point_platform_END.location;
+                    bool aSTART_to_bSTART = Positions_Are_Adjacent(_PA_START, _PB_START);
+                    bool aSTART_to_bEND = Positions_Are_Adjacent(_PA_START, _PB_END);
+                    bool aEND_to_bEND = Positions_Are_Adjacent(_PA_END, _PB_END);
+                    bool aEND_to_bSTART = Positions_Are_Adjacent(_PA_END, _PB_START);
+
+                    if ((aSTART_to_bSTART && aEND_to_bEND) || (aEND_to_bSTART && aSTART_to_bEND))
+                    {
+                        _PA.Add_AdjacentPlatform(_PB);
+                    }
+                }
+            }
+        }
+
+        foreach (MetroLine _ML in metroLines)
+        {
+            foreach (MetroLine _OTHER_ML in metroLines)
+            {
+                if (_OTHER_ML != _ML)
+                {
+                    if (_ML.Has_ConnectionToMetroLine(_OTHER_ML))
+                    {
+                        Debug.Log(_ML.lineName + " is connected to " + _OTHER_ML.lineName);
+                    }
+                }
+            }
+        }
+    }
+
+    private bool Positions_Are_Adjacent(Vector3 _A, Vector3 _B)
+    {
+        return Vector3.Distance(_A, _B) <= PLATFORM_ADJACENCY_LIMIT;
     }
 
     void Update_MetroLines()
@@ -178,24 +224,24 @@ public class Metro : MonoBehaviour
             {
                 _endPlatform = GetRandomPlatform();
             }
-            
+
             AddCommuter(_startPlatform, _endPlatform);
         }
     }
 
     Platform GetRandomPlatform()
     {
-        int _LINE_INDEX = 0;
+        int _LINE_INDEX = Random.Range(0, metroLines.Length - 1);
         MetroLine _LINE = metroLines[_LINE_INDEX];
-        int _PLATFORM_INDEX = Mathf.FloorToInt(Random.Range(0f, (float)_LINE.platforms.Count));
+        int _PLATFORM_INDEX = Mathf.FloorToInt(Random.Range(0f, (float) _LINE.platforms.Count));
         return _LINE.platforms[_PLATFORM_INDEX];
     }
 
-    [ContextMenu("ADD COMMUTER")]
     public void AddCommuter(Platform _start, Platform _end)
     {
         GameObject commuter_OBJ =
-            (GameObject) Instantiate(Metro.INSTANCE.prefab_commuter, _start.transform.position + new Vector3(0f,0f,0f), transform.rotation);
+            (GameObject) Instantiate(Metro.INSTANCE.prefab_commuter,
+                _start.transform.position + new Vector3(0f, 0f, 0f), transform.rotation);
         Commuter _C = commuter_OBJ.GetComponent<Commuter>();
         _C.Init(_start, _end);
         commuters.Add(_C);
@@ -206,7 +252,6 @@ public class Metro : MonoBehaviour
     {
         commuters.Remove(_commuter);
         Destroy(_commuter.gameObject);
-        Debug.Log("Total Commuters left: " + commuters.Count);
     }
 
     public void Update_Commuters()
@@ -218,6 +263,7 @@ public class Metro : MonoBehaviour
     }
 
     #endregion -------------------------------------- Commuters >>
+
 
     #region ------------------------- < GIZMOS
 
