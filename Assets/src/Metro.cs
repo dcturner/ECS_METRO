@@ -166,13 +166,13 @@ public class Metro : MonoBehaviour
             }
         }
 
-//        foreach (Platform _P in allPlatforms)
-//        {
-//            foreach (Platform _ADJ in _P.adjacentPlatforms)
-//            {
-//                Debug.Log(_P.GetFullName() + " -- " + _ADJ.GetFullName());
-//            }
-//        }
+        foreach (Platform _P in allPlatforms)
+        {
+            foreach (Platform _ADJ in _P.adjacentPlatforms)
+            {
+                Debug.Log(_P.GetFullName() + " -- " + _ADJ.GetFullName());
+            }
+        }
     }
 
     private bool Positions_Are_Adjacent(Vector3 _A, Vector3 _B)
@@ -296,7 +296,7 @@ public class Metro : MonoBehaviour
 
     public Queue<CommuterTask> ShortestRoute(Platform _A, Platform _B)
     {
-//        Debug.Log("Getting from "+_A.GetFullName()+" to "+_B.GetFullName());
+        Debug.Log("Getting from "+_A.GetFullName()+" to "+_B.GetFullName());
         foreach (Platform _P in allPlatforms)
         {
             _P.temporary_routeDistance = 999;
@@ -329,7 +329,7 @@ public class Metro : MonoBehaviour
         {
             if (arrived)
             {
-//                Debug.Log("Arrived at " + _B.GetFullName() + " after "+steps+" steps");
+                Debug.Log("Arrived at " + _B.GetFullName() + " after "+steps+" steps");
                 break;
             }
 
@@ -343,6 +343,7 @@ public class Metro : MonoBehaviour
 
         Platform _CURRENT_PLATFORM = _B;
         Platform _PREV_PLATFORM = _B.temporary_accessedViaPlatform;
+        Debug.Log(commuters.Count +  ", start: " + _A.GetFullName() + "Dest: " + _B.GetFullName() + ",  b prev: " + _PREV_PLATFORM.GetFullName());
         List<CommuterTask> _TASK_LIST = new List<CommuterTask>();
         while (_CURRENT_PLATFORM != _A)
         {

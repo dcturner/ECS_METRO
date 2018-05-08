@@ -119,32 +119,32 @@ public class Commuter : MonoBehaviour
     void SetupRoute()
     {
         route_TaskList = Metro.INSTANCE.ShortestRoute(currentPlatform, FinalDestination);
-//        CommuterTask[] _TEMP = route_TaskList.ToArray();
-//        for (int i = 0; i < route_TaskList.Count; i++)
-//        {
-//            CommuterTask _T = _TEMP[i];
-//            string _S = "route step: " + i + ",  " + _T.state;
-//            switch (_T.state)
-//            {
-//                    case CommuterState.WALK:
-//                    _S += ", startPlatform: " + _T.startPlatform.GetFullName();
-//                    _S += ", endPlatform: " + _T.endPlatform.GetFullName();
-//                        
-//                        break;
-//                case CommuterState.QUEUE:
-//                    _S += ", on platform: " + _T.startPlatform.GetFullName();
-//                    break;
-//                case CommuterState.GET_ON_TRAIN:
-//                    break;
-//                case CommuterState.WAIT_FOR_STOP:
-//                    _S += ", waiting for stop: " + _T.endPlatform.GetFullName();
-//                    break;
-//                case CommuterState.GET_OFF_TRAIN:
-//                    _S += ", endPlatform: " + _T.endPlatform.GetFullName();
-//                    break;
-//            }
-//            Debug.Log(_S);
-//        }
+        CommuterTask[] _TEMP = route_TaskList.ToArray();
+        for (int i = 0; i < route_TaskList.Count; i++)
+        {
+            CommuterTask _T = _TEMP[i];
+            string _S = "route step: " + i + ",  " + _T.state;
+            switch (_T.state)
+            {
+                    case CommuterState.WALK:
+                    _S += ", startPlatform: " + _T.startPlatform.GetFullName();
+                    _S += ", endPlatform: " + _T.endPlatform.GetFullName();
+                        
+                        break;
+                case CommuterState.QUEUE:
+                    _S += ", on platform: " + _T.startPlatform.GetFullName();
+                    break;
+                case CommuterState.GET_ON_TRAIN:
+                    break;
+                case CommuterState.WAIT_FOR_STOP:
+                    _S += ", waiting for stop: " + _T.endPlatform.GetFullName();
+                    break;
+                case CommuterState.GET_OFF_TRAIN:
+                    _S += ", endPlatform: " + _T.endPlatform.GetFullName();
+                    break;
+            }
+            Debug.Log(_S);
+        }
         NextTask();
     }
 
