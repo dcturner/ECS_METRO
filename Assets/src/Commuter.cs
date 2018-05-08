@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -115,29 +116,33 @@ public class Commuter : MonoBehaviour
     void SetupRoute()
     {
         route_TaskList = Metro.INSTANCE.ShortestRoute(currentPlatform, FinalDestination);
+//        CommuterTask[] _TEMP = route_TaskList.ToArray();
+//        for (int i = 0; i < route_TaskList.Count; i++)
+//        {
+//            CommuterTask _T = _TEMP[i];
+//            string _S = "route step: " + i + ",  " + _T.state;
+//            switch (_T.state)
+//            {
+//                    case CommuterState.WALK:
+//                    _S += ", startPlatform: " + _T.startPlatform.GetFullName();
+//                    _S += ", endPlatform: " + _T.endPlatform.GetFullName();
+//                        
+//                        break;
+//                case CommuterState.QUEUE:
+//                    _S += ", on platform: " + _T.startPlatform.GetFullName();
+//                    break;
+//                case CommuterState.GET_ON_TRAIN:
+//                    break;
+//                case CommuterState.WAIT_FOR_STOP:
+//                    _S += ", waiting for stop: " + _T.endPlatform.GetFullName();
+//                    break;
+//                case CommuterState.GET_OFF_TRAIN:
+//                    _S += ", endPlatform: " + _T.endPlatform.GetFullName();
+//                    break;
+//            }
+//            Debug.Log(_S);
+//        }
         NextTask();
-    }
-
-    void ShortestRoute(Platform _A, Platform _B)
-    {
-        bool isOpposite = _B == _A.oppositePlatform;
-        bool isAdjacent = _A.adjacentPlatforms.Contains(_B);
-        bool isSameLine = _A.parentMetroLine == _B.parentMetroLine;
-
-        if (isOpposite)
-        {
-            Add_WalkToOppositePlatform(_A, _B);
-        }else if (isAdjacent)
-        {
-            Add_WalkToAdjacentPlatform(_A, _B);
-        }
-        else if(isSameLine)
-        {
-            Add_TrainConnection(_A, _B);
-        }
-        else
-        {
-        }
     }
 
 
@@ -259,6 +264,7 @@ public class Commuter : MonoBehaviour
                     };
                     break;
                 case CommuterState.WAIT_FOR_STOP:
+                    targetPlatform = currentTask.endPlatform;
                     break;
                 case CommuterState.GET_OFF_TRAIN:
                     t.SetParent(Metro.INSTANCE.transform);
@@ -297,17 +303,4 @@ public class Commuter : MonoBehaviour
             NextTask();
         }
     }
-    
-    #region ------------------------- < GIZMOS
-
-    private void OnDrawGizmos()
-    {
-        if (currentTrainDoor != null)
-        {
-            Gizmos.DrawLine(t.position, currentTrainDoor.transform.position);
-        }
-    }
-
-    #endregion ------------------------ GIZMOS >
-
 }

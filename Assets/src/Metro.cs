@@ -12,6 +12,7 @@ public class Metro : MonoBehaviour
     public static float PLATFORM_ADJACENCY_LIMIT = 10f;
     public const int BEZIER_MEASUREMENT_SUBDIVISIONS = 2;
     public const float PLATFORM_ARRIVAL_THRESHOLD = 0.975f;
+    public const float RAIL_SPACING = 0.5f;
     public static Metro INSTANCE;
 
 
@@ -19,6 +20,8 @@ public class Metro : MonoBehaviour
     public GameObject prefab_trainCarriage;
     public GameObject prefab_platform;
     public GameObject prefab_commuter;
+    public GameObject prefab_rail;
+    public int maxCommuters = 2000;
     [Range(0f, 1f)] public float Bezier_HandleReach = 0.3f;
     public float Bezier_PlatformOffset = 3f;
     [Header("Trains")] public float Train_accelerationStrength = 0.001f;
@@ -146,10 +149,19 @@ public class Metro : MonoBehaviour
                     if ((aSTART_to_bSTART && aEND_to_bEND) || (aEND_to_bSTART && aSTART_to_bEND))
                     {
                         _PA.Add_AdjacentPlatform(_PB);
+                        _PA.oppositePlatform.Add_AdjacentPlatform(_PB);
                     }
                 }
             }
         }
+
+//        foreach (Platform _P in allPlatforms)
+//        {
+//            foreach (Platform _ADJ in _P.adjacentPlatforms)
+//            {
+//                Debug.Log(_P.GetFullName() + " -- " + _ADJ.GetFullName());
+//            }
+//        }
     }
 
     private bool Positions_Are_Adjacent(Vector3 _A, Vector3 _B)
@@ -203,7 +215,7 @@ public class Metro : MonoBehaviour
 
     public void SetupCommuters()
     {
-        for (int i = 0; i < 1; i++)
+        for (int i = 0; i < maxCommuters; i++)
         {
             Platform _startPlatform = GetRandomPlatform();
             Platform _endPlatform = GetRandomPlatform();
@@ -214,9 +226,9 @@ public class Metro : MonoBehaviour
                 _endPlatform = GetRandomPlatform();
             }
 
-//            AddCommuter(_startPlatform, _endPlatform);
+            AddCommuter(_startPlatform, _endPlatform);
 
-            AddCommuter(metroLines[0].platforms[0], metroLines[1].platforms[2]);
+//            AddCommuter(metroLines[0].platforms[0], metroLines[1].platforms[2]);
         }
     }
 
@@ -242,6 +254,7 @@ public class Metro : MonoBehaviour
     {
         commuters.Remove(_commuter);
         Destroy(_commuter.gameObject);
+        Debug.Log("COMMUTER ARRIVED, remaining: " + commuters.Count);
     }
 
     public void Update_Commuters()
@@ -272,10 +285,12 @@ public class Metro : MonoBehaviour
 
     public Queue<CommuterTask> ShortestRoute(Platform _A, Platform _B)
     {
-        Debug.Log("Getting from "+_A.GetFullName()+" to "+_B.GetFullName());
+//        Debug.Log("Getting from "+_A.GetFullName()+" to "+_B.GetFullName());
         foreach (Platform _P in allPlatforms)
         {
             _P.temporary_routeDistance = 999;
+            _P.temporary_accessedViaPlatform = null;
+            _P.temporary_connectionType = CommuterState.WALK;
         }
 
         int steps = 0;
@@ -286,15 +301,15 @@ public class Metro : MonoBehaviour
         Include_platform_if_new_or_improved(_ROUTE_PLATFORMS, _A, steps);
         foreach (Platform _ADJ in _A.adjacentPlatforms)
         {
-            Include_platform_if_new_or_improved(_ROUTE_PLATFORMS, _ADJ, steps);
-            Include_platform_if_new_or_improved(_ROUTE_PLATFORMS, _ADJ.oppositePlatform, steps);
+            Include_platform_if_new_or_improved(_ROUTE_PLATFORMS, _ADJ, steps, _A);
+            Include_platform_if_new_or_improved(_ROUTE_PLATFORMS, _ADJ.oppositePlatform, steps, _A);
         }
         // Add OPPOSITE platform (and adjacents)
-        Include_platform_if_new_or_improved(_ROUTE_PLATFORMS, _A.oppositePlatform, steps);
+        Include_platform_if_new_or_improved(_ROUTE_PLATFORMS, _A.oppositePlatform, steps, _A);
         foreach (Platform _ADJ in _A.oppositePlatform.adjacentPlatforms)
         {
             Include_platform_if_new_or_improved(_ROUTE_PLATFORMS, _ADJ, steps);
-            Include_platform_if_new_or_improved(_ROUTE_PLATFORMS, _ADJ.oppositePlatform, steps);
+            Include_platform_if_new_or_improved(_ROUTE_PLATFORMS, _ADJ.oppositePlatform, steps, _A);
         }
 
         bool arrived = _ROUTE_PLATFORMS.Contains(_B);
@@ -302,7 +317,7 @@ public class Metro : MonoBehaviour
         {
             if (arrived)
             {
-                Debug.Log("Arrived at " + _B.GetFullName() + " after "+steps+" steps");
+//                Debug.Log("Arrived at " + _B.GetFullName() + " after "+steps+" steps");
                 break;
             }
             steps++;
@@ -310,7 +325,79 @@ public class Metro : MonoBehaviour
             arrived = _ROUTE_PLATFORMS.Contains(_B);
         }
 
-        return null;
+        
+        // write the route from B -> A, then reverse it
+
+        Platform _CURRENT_PLATFORM = _B;
+        Platform _PREV_PLATFORM = _B.temporary_accessedViaPlatform;
+        List<CommuterTask> _TASK_LIST = new List<CommuterTask>();
+        while(_CURRENT_PLATFORM!=_A){
+            
+            // if this is _B (the destination, and we arrived by rail, it's safe to get off)
+            if (_CURRENT_PLATFORM == _B && _CURRENT_PLATFORM.temporary_connectionType == CommuterState.GET_OFF_TRAIN)
+            {
+                _TASK_LIST.Add(new CommuterTask(CommuterState.GET_OFF_TRAIN){endPlatform = _CURRENT_PLATFORM});
+                _TASK_LIST.Add(new CommuterTask(CommuterState.WAIT_FOR_STOP)
+                {
+                    endPlatform = _CURRENT_PLATFORM
+                });
+            }
+            
+            // add a WALK connection
+            if (_CURRENT_PLATFORM.temporary_connectionType == CommuterState.WALK)
+            {
+             
+                CommuterTask _walkTask = new CommuterTask(CommuterState.WALK){destinations = new Vector3[]
+                    {
+                        _CURRENT_PLATFORM.temporary_accessedViaPlatform.walkway_FRONT_CROSS.nav_START.position,
+                        _CURRENT_PLATFORM.temporary_accessedViaPlatform.walkway_FRONT_CROSS.nav_END.position,
+                        _CURRENT_PLATFORM.walkway_BACK_CROSS.nav_END.position,
+                        _CURRENT_PLATFORM.walkway_BACK_CROSS.nav_START.position
+                    }, startPlatform = _PREV_PLATFORM, endPlatform = _CURRENT_PLATFORM
+                };
+                _TASK_LIST.Add(_walkTask);
+                
+                
+                if (_PREV_PLATFORM.temporary_connectionType == CommuterState.GET_OFF_TRAIN)
+                {
+                    _TASK_LIST.Add(new CommuterTask(CommuterState.GET_OFF_TRAIN){endPlatform = _PREV_PLATFORM});
+                    _TASK_LIST.Add(new CommuterTask(CommuterState.WAIT_FOR_STOP)
+                    {
+                        endPlatform = _PREV_PLATFORM
+                    });
+                }
+                
+            }
+            else // add a train link
+            {
+                if (_PREV_PLATFORM.temporary_connectionType == CommuterState.WALK)
+                {
+                    _TASK_LIST.Add(new CommuterTask(CommuterState.GET_ON_TRAIN));
+                    _TASK_LIST.Add(new CommuterTask(CommuterState.QUEUE) {startPlatform = _PREV_PLATFORM});
+                }
+            }
+
+            
+            // exit loop when we arrive at _A
+            if (_CURRENT_PLATFORM.temporary_accessedViaPlatform != null)
+            {
+            _CURRENT_PLATFORM = _CURRENT_PLATFORM.temporary_accessedViaPlatform;
+                _PREV_PLATFORM = _CURRENT_PLATFORM.temporary_accessedViaPlatform;
+            }
+            else
+            {
+                break;
+            }
+
+        }
+
+        _TASK_LIST.Reverse();
+        Queue<CommuterTask> result = new Queue<CommuterTask>();
+        for (int i = 0; i < _TASK_LIST.Count; i++)
+        {
+            result.Enqueue(_TASK_LIST[i]);
+        }
+        return result;
     }
 
 
@@ -319,31 +406,27 @@ public class Metro : MonoBehaviour
         List<Platform> result = new List<Platform>();
         foreach (Platform _P in _input)
         {
-            Include_platform_if_new_or_improved(result, _P.nextPlatform, _currentStep);
+            Include_platform_if_new_or_improved(result, _P.nextPlatform, _currentStep, _P, CommuterState.GET_OFF_TRAIN);
             foreach (Platform _ADJ in _P.adjacentPlatforms)
             {
-                Include_platform_if_new_or_improved(result, _ADJ.nextPlatform, _currentStep);
-                Include_platform_if_new_or_improved(result, _ADJ.nextPlatform.oppositePlatform, _currentStep);
+                Include_platform_if_new_or_improved(result, _ADJ, _currentStep,_P);
+                Include_platform_if_new_or_improved(result, _ADJ.oppositePlatform, _currentStep, _P);
             }
 
-            Include_platform_if_new_or_improved(result, _P.nextPlatform.oppositePlatform, _currentStep);
-            foreach (Platform _ADJ in _P.nextPlatform.oppositePlatform.adjacentPlatforms)
-            {
-                Include_platform_if_new_or_improved(result, _ADJ.nextPlatform, _currentStep);
-                Include_platform_if_new_or_improved(result, _ADJ.nextPlatform.oppositePlatform, _currentStep);
-            }
+            Include_platform_if_new_or_improved(result, _P.oppositePlatform, _currentStep, _P);
         }
 
         return result;
     }
 
-    void Include_platform_if_new_or_improved(List<Platform> _platformList, Platform _testPlatform, int _currentStep)
+    void Include_platform_if_new_or_improved(List<Platform> _platformList, Platform _testPlatform, int _currentStep, Platform _accessedVia = null, CommuterState _connectionType = CommuterState.WALK)
     {
         if (_testPlatform.temporary_routeDistance > _currentStep)
         {
             _testPlatform.temporary_routeDistance = _currentStep;
-            Debug.Log(_testPlatform.GetFullName() +
-                      " distance is now " + _testPlatform.temporary_routeDistance);
+            _testPlatform.temporary_accessedViaPlatform = _accessedVia;   
+            _testPlatform.temporary_connectionType = _connectionType;
+//            Debug.Log(_testPlatform.GetFullName() +  ", dist: " + _testPlatform.temporary_routeDistance);
             _platformList.Add(_testPlatform);
         }
     }
@@ -366,15 +449,6 @@ public class Metro : MonoBehaviour
                     for (int pointIndex = 0; pointIndex < _path.points.Count; pointIndex++)
                     {
                         BezierPoint _CURRENT_POINT = _path.points[pointIndex];
-
-                        Gizmos.color = Color.cyan;
-                        Gizmos.DrawWireSphere(_CURRENT_POINT.location, 0.1f);
-
-                        Gizmos.color = Color.red;
-                        Gizmos.DrawWireCube(_CURRENT_POINT.handle_in, Vector3.one * 0.025f);
-                        Gizmos.color = Color.green;
-                        Gizmos.DrawWireCube(_CURRENT_POINT.handle_out, Vector3.one * 0.025f);
-
                         BezierPoint _NEXT_POINT = _path.points[(pointIndex + 1) % _path.points.Count];
                         // Link them up
                         Handles.DrawBezier(_CURRENT_POINT.location, _NEXT_POINT.location, _CURRENT_POINT.handle_out,

@@ -18,6 +18,8 @@ public class Platform : MonoBehaviour
     public Train currentTrainAtPlatform;
 
     public int temporary_routeDistance = 0;
+    public Platform temporary_accessedViaPlatform;
+    public CommuterState temporary_connectionType;
 
     public void SetupPlatform(MetroLine _parentMetroLine, BezierPoint _start, BezierPoint _end)
     {
@@ -54,12 +56,27 @@ public class Platform : MonoBehaviour
 
     public void Add_AdjacentPlatform(Platform _platform)
     {
-        if (!adjacentPlatforms.Contains(_platform) && _platform != oppositePlatform)
+        AddAdjacentIfNotPresent(_platform);
+        AddAdjacentIfNotPresent(_platform.oppositePlatform);
+        foreach (Platform _ADJ in _platform.adjacentPlatforms)
         {
-            Debug.Log(parentMetroLine.metroLine_index + "_" + point_platform_END.index + "   is adjacent to  " 
-                      +_platform.parentMetroLine.metroLine_index+"_"+_platform.point_platform_END.index);
+            AddAdjacentIfNotPresent(_ADJ);
+            _ADJ.AddAdjacentIfNotPresent(this);
+            _ADJ.AddAdjacentIfNotPresent(this.oppositePlatform);
+        }
+        foreach (Platform _ADJ in _platform.oppositePlatform.adjacentPlatforms)
+        {
+            AddAdjacentIfNotPresent(_ADJ);
+            _ADJ.AddAdjacentIfNotPresent(this);
+            _ADJ.AddAdjacentIfNotPresent(this.oppositePlatform);
+        }
+    }
+
+    public void AddAdjacentIfNotPresent(Platform _platform)
+    {
+        if (!adjacentPlatforms.Contains(_platform) && _platform != this)
+        {
             adjacentPlatforms.Add(_platform);
-            _platform.Add_AdjacentPlatform(this);
         }
     }
 
@@ -101,6 +118,6 @@ public class Platform : MonoBehaviour
     private void OnDrawGizmos()
     {
         Handles.color = Color.black;
-        Handles.Label(transform.position, ""+temporary_routeDistance);
+        Handles.Label(transform.position, ""+GetFullName());
     }
 }

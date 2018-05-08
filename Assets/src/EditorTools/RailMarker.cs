@@ -38,8 +38,8 @@ public class RailMarker : MonoBehaviour
 		{
 			Gizmos.DrawLine(transform.position, transform.parent.GetChild(pointIndex+1).position);
 		}
-
-		Handles.Label(transform.position + new Vector3(0f,1f,0f), metroLineID+"_"+pointIndex);
+		
+		Handles.Label(transform.position + new Vector3(0f,1f,0f), metroLineID+"_"+pointIndex + ((railMarkerType == RailMarkerType.PLATFORM_START) ? " **" : ""));
 	}
 	
 	int GetSiblingIndex(Transform child, Transform parent)

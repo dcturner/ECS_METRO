@@ -296,7 +296,7 @@ public class Train
             TrainCarriage _CARRIAGE = carriages[i];
             foreach (Commuter _PASSENGER in _CARRIAGE.passengers)
             {
-                if (_PASSENGER.FinalDestination == nextPlatform ||
+                if (_PASSENGER.targetPlatform == nextPlatform ||
                     nextPlatform.oppositePlatform == _PASSENGER.FinalDestination)
                 {
                     passengers_to_DISEMBARK.Add(_PASSENGER);
