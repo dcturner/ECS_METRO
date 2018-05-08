@@ -963,7 +963,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1520699592271904}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 15.75, y: 0, z: 2}
+  m_LocalPosition: {x: 15.75, y: -0.07999998, z: 2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 4725100167415324}
@@ -1028,7 +1028,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1774999610657538}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 21, y: 0, z: 2}
+  m_LocalPosition: {x: 21, y: -0.07999998, z: 2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 4725100167415324}
@@ -1305,7 +1305,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1165856224500104}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 5.25, y: 0, z: 2}
+  m_LocalPosition: {x: 5.25, y: -0.07999998, z: 2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 4725100167415324}
@@ -1331,7 +1331,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1812062204045728}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 10.5, y: 0, z: 2}
+  m_LocalPosition: {x: 10.5, y: -0.08, z: 2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 4725100167415324}
@@ -1505,7 +1505,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1975248725857304}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 2}
+  m_LocalPosition: {x: 0, y: -0.07999998, z: 2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 4725100167415324}
@@ -4066,15 +4066,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   carriageCount: 0
+  platformIndex: 0
   walkways: []
   walkway_FRONT_CROSS: {fileID: 114253827140286778}
   walkway_BACK_CROSS: {fileID: 114485383125700058}
-  walkway_UP: {fileID: 0}
-  walkway_DOWN: {fileID: 0}
   oppositePlatform: {fileID: 0}
+  nextPlatform: {fileID: 0}
+  adjacentPlatforms: []
   queuePoints:
   - {fileID: 114236860802978810}
   - {fileID: 114009051278569208}
   - {fileID: 114509556575811336}
   - {fileID: 114201748706647212}
   - {fileID: 114466751992647886}
+  temporary_routeDistance: 0
+  temporary_accessedViaPlatform: {fileID: 0}
+  temporary_connectionType: 0

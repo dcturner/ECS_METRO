@@ -44,7 +44,7 @@ public class Commuter : MonoBehaviour
     private Queue<CommuterTask> route_TaskList;
     private CommuterTask currentTask;
     public Platform currentPlatform, route_START, route_END;
-    public Platform targetPlatform;
+    public Platform nextPlatform;
     public Platform FinalDestination;
     private Vector3 speed = Vector3.zero;
     private float acceleration;
@@ -93,7 +93,7 @@ public class Commuter : MonoBehaviour
         {
             destinationIndex = _end.point_platform_END.index
         });
-        route_TaskList.Enqueue(new CommuterTask(CommuterState.GET_OFF_TRAIN){endPlatform = _end});
+        route_TaskList.Enqueue(new CommuterTask(CommuterState.GET_OFF_TRAIN) {endPlatform = _end});
     }
 
     void Add_WalkToAdjacentPlatform(Platform _A, Platform _B)
@@ -102,14 +102,17 @@ public class Commuter : MonoBehaviour
 
     void Add_WalkToOppositePlatform(Platform _A, Platform _B)
     {
-        route_TaskList.Enqueue(new CommuterTask(CommuterState.WALK) {
-            startPlatform =  _A,
+        route_TaskList.Enqueue(new CommuterTask(CommuterState.WALK)
+        {
+            startPlatform = _A,
             endPlatform = _B,
-            destinations = new Vector3[]{
+            destinations = new Vector3[]
+            {
                 _A.walkway_FRONT_CROSS.nav_START.transform.position,
                 _A.walkway_FRONT_CROSS.nav_END.transform.position,
                 _B.walkway_BACK_CROSS.nav_END.transform.position,
-                _B.walkway_BACK_CROSS.nav_START.transform.position}
+                _B.walkway_BACK_CROSS.nav_START.transform.position
+            }
         });
     }
 
@@ -166,7 +169,8 @@ public class Commuter : MonoBehaviour
                 break;
             case CommuterState.QUEUE:
 
-                Vector3 queueOffset = new Vector3(currentQueue.Count * QUEUE_PERSONAL_SPACE, 0f, 0f);
+                float offset = currentQueue.Count * QUEUE_PERSONAL_SPACE;
+                Vector3 queueOffset = currentPlatform.transform.forward * offset;
                 Vector3 _DEST = currentPlatform.queuePoints[carriageQueueIndex].transform.position + queueOffset;
                 if (!currentQueue.Contains(this))
                 {
@@ -184,9 +188,7 @@ public class Commuter : MonoBehaviour
                             stateDelay = QUEUE_DECISION_RATE;
                         }
                     }
-                }
-
-                ;
+                };
                 break;
             case CommuterState.GET_ON_TRAIN:
                 // brief wait before boarding
@@ -236,14 +238,28 @@ public class Commuter : MonoBehaviour
             currentTask = route_TaskList.Dequeue();
             if (currentTask.startPlatform != null)
             {
-            currentPlatform = currentTask.startPlatform;
+                currentPlatform = currentTask.startPlatform;
 //                Debug.Log("Current platform is now: " + currentPlatform.point_platform_END.index);
+            }
+
+            if (currentTask.endPlatform != null)
+            {
+                nextPlatform = currentTask.endPlatform;
             }
 
             switch (currentTask.state)
             {
                 case CommuterState.WALK:
+                    Walkway walk_A = GetNearestWalkway(t.position, currentPlatform);
+                    Walkway walk_B = GetNearestWalkway(walk_A.nav_END.transform.position, nextPlatform);
 
+                    currentTask.destinations = new Vector3[]
+                    {
+                        walk_A.nav_START.transform.position,
+                        walk_A.nav_END.transform.position,
+                        walk_B.nav_END.transform.position,
+                        walk_B.nav_START.transform.position
+                    };
                     break;
                 case CommuterState.QUEUE:
                     // pick shortest queue
@@ -251,7 +267,8 @@ public class Commuter : MonoBehaviour
                     carriageQueueIndex = currentPlatform.Get_ShortestQueue();
                     currentQueue = currentPlatform.platformQueues[carriageQueueIndex];
                     myQueueIndex = currentQueue.Count;
-                    currentTask.destinations = new Vector3[] {currentPlatform.queuePoints[carriageQueueIndex].transform.position};
+                    currentTask.destinations = new Vector3[]
+                        {currentPlatform.queuePoints[carriageQueueIndex].transform.position};
                     break;
                 case CommuterState.GET_ON_TRAIN:
                     // delay movement - stagger by queueIndex
@@ -264,7 +281,7 @@ public class Commuter : MonoBehaviour
                     };
                     break;
                 case CommuterState.WAIT_FOR_STOP:
-                    targetPlatform = currentTask.endPlatform;
+                    nextPlatform = currentTask.endPlatform;
                     break;
                 case CommuterState.GET_OFF_TRAIN:
                     t.SetParent(Metro.INSTANCE.transform);
@@ -286,6 +303,20 @@ public class Commuter : MonoBehaviour
         }
     }
 
+    public Walkway GetNearestWalkway(Vector3 _origin, Platform _platform)
+    {
+        float dist_front = Vector3.Distance(_platform.walkway_FRONT_CROSS.transform.position, _origin);
+        float dist_back = Vector3.Distance(_platform.walkway_BACK_CROSS.transform.position, _origin);
+        if (dist_front < dist_back)
+        {
+            return _platform.walkway_FRONT_CROSS;
+        }
+        else
+        {
+            return _platform.walkway_BACK_CROSS;
+        }
+    }
+
     public void LeaveTrain()
     {
         if (currentTask.state == CommuterState.WAIT_FOR_STOP)
@@ -293,7 +324,7 @@ public class Commuter : MonoBehaviour
             NextTask();
         }
     }
-    
+
     public void BoardTrain(Train _train, TrainCarriage_door _carriageDoor)
     {
         currentTrain = _train;

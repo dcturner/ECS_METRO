@@ -3418,10 +3418,11 @@ MonoBehaviour:
     type: 2}
   prefab_rail: {fileID: 1004504532206030, guid: 45c88b34fc7e54940a710ca1e3fcdee2,
     type: 2}
+  drawRailBeziers: 0
+  maxCommuters: 2000
   Bezier_HandleReach: 0.15
   Bezier_PlatformOffset: 8
   Train_accelerationStrength: 0.000001
-  Train_brakeStrength: 0.01
   Train_railFriction: 1
   Train_delay_doors_OPEN: 1
   Train_delay_doors_CLOSE: 1
@@ -3434,10 +3435,10 @@ MonoBehaviour:
   maxTrains: 06000000060000000400000004000000
   carriagesPerTrain: 05000000050000000400000004000000
   maxTrainSpeed:
-  - 0.005
-  - 0.005
-  - 0.005
-  - 0.005
+  - 0.002
+  - 0.002
+  - 0.002
+  - 0.002
   LineColours:
   - {r: 1, g: 0.2216981, b: 0.2216981, a: 1}
   - {r: 0.1273585, g: 1, b: 0.51499337, a: 1}

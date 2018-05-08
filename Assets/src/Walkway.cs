@@ -7,13 +7,4 @@ public class Walkway : MonoBehaviour {
 
     public Platform connects_FROM, connects_TO;
     public Transform nav_START, nav_END;
-
-    private void OnDrawGizmos()
-    {
-        if (nav_END != null && nav_START != null)
-        {
-            Gizmos.color = Color.magenta;
-            Gizmos.DrawLine(nav_START.position, nav_END.position);
-        }
-    }
 }

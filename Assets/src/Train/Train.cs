@@ -53,7 +53,6 @@ public class Train
         passengers_to_EMBARK = new List<Commuter>();
         speed = 0f;
         accelerationStrength = Metro.INSTANCE.Train_accelerationStrength * parentLine.speedRatio;
-        brakeStrength = Metro.INSTANCE.Train_brakeStrength;
         railFriction = Metro.INSTANCE.Train_railFriction;
         ChangeState(TrainState.DEPARTING);
     }
@@ -296,7 +295,7 @@ public class Train
             TrainCarriage _CARRIAGE = carriages[i];
             foreach (Commuter _PASSENGER in _CARRIAGE.passengers)
             {
-                if (_PASSENGER.targetPlatform == nextPlatform ||
+                if (_PASSENGER.nextPlatform == nextPlatform ||
                     nextPlatform.oppositePlatform == _PASSENGER.FinalDestination)
                 {
                     passengers_to_DISEMBARK.Add(_PASSENGER);
